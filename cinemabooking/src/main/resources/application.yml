@@ -9,7 +9,7 @@ spring:
     username: sa
     password:
 
-  # H2 - pozwala podgl?da? baz? w przegl?darce
+  # H2 - pozwala podgladac baze w przegladarce
   h2:
     console:
       enabled: true
@@ -22,6 +22,6 @@ spring:
       ddl-auto: update # automatycznie tworzy tabele
     show-sql: true # Pokazuje zapytania SQL w konsoli
 
-  # Thymeleaf (?eby nie cache'owa? widoków)
+  # Thymeleaf (zeby nie cacheowal widoków)
   thymeleaf:
     cache: false

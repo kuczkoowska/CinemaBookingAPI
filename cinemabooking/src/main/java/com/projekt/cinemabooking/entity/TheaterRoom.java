@@ -23,6 +23,6 @@ public class TheaterRoom {
     private int totalRows;
     private int seatsPerRow;
 
-    @OneToMany(mappedBy = "theatherRoom", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "theaterRoom", cascade = CascadeType.ALL)
     private List<Seat> seats;
 }

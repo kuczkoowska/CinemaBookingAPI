@@ -22,6 +22,6 @@ spring:
       ddl-auto: update # automatycznie tworzy tabele
     show-sql: true # Pokazuje zapytania SQL w konsoli
 
-  # Thymeleaf (zeby nie cacheowal widoków)
+  # Thymeleaf (zeby nie cacheowal widokï¿½w)
   thymeleaf:
     cache: false

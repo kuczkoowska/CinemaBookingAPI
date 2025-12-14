@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto;
+package com.projekt.cinemabooking.dto.movie;
 
 import lombok.*;
 

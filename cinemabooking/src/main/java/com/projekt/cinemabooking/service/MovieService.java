@@ -1,7 +1,7 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.CreateMovieDto;
-import com.projekt.cinemabooking.dto.MovieDto;
+import com.projekt.cinemabooking.dto.movie.CreateMovieDto;
+import com.projekt.cinemabooking.dto.movie.MovieDto;
 import com.projekt.cinemabooking.entity.Movie;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.mapper.MovieMapper;

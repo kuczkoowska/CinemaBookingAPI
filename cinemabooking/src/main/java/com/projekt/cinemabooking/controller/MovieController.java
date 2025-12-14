@@ -1,7 +1,7 @@
 package com.projekt.cinemabooking.controller;
 
-import com.projekt.cinemabooking.dto.CreateMovieDto;
-import com.projekt.cinemabooking.dto.MovieDto;
+import com.projekt.cinemabooking.dto.movie.CreateMovieDto;
+import com.projekt.cinemabooking.dto.movie.MovieDto;
 import com.projekt.cinemabooking.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

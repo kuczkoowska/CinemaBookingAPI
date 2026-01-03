@@ -28,4 +28,14 @@ public class Screening {
     @ManyToOne
     @JoinColumn(name = "theater_room_id")
     private TheaterRoom theaterRoom;
+
+    private LocalDateTime endTime;
+
+    @PrePersist
+    @PreUpdate
+    public void calculateEndTime() {
+        if (movie != null && startTime != null) {
+            this.endTime = startTime.plusMinutes(movie.getDurationMinutes() + 20);
+        }
+    }
 }

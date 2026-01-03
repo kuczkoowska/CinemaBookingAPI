@@ -21,6 +21,11 @@ spring:
     hibernate:
       ddl-auto: update # automatycznie tworzy tabele
     show-sql: true # Pokazuje zapytania SQL w konsoli
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
 
   # Thymeleaf (zeby nie cacheowal widok�w)
   thymeleaf:

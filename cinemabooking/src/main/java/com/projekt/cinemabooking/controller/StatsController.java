@@ -25,4 +25,10 @@ public class StatsController {
     public ResponseEntity<List<SalesStatsDto>> getDailySales() {
         return ResponseEntity.ok(statsRepository.getSalesByDate());
     }
+
+    @Operation(summary = "Logi systemowe", description = "Wyświetla historię zdarzeń")
+    @GetMapping("/logs")
+    public ResponseEntity<List<String>> getSystemLogs() {
+        return ResponseEntity.ok(statsRepository.getAllSystemLogs());
+    }
 }

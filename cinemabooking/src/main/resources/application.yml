@@ -30,3 +30,7 @@ spring:
   # Thymeleaf (zeby nie cacheowal widok�w)
   thymeleaf:
     cache: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG

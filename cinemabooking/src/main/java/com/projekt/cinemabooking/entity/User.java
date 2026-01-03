@@ -32,7 +32,7 @@ public class User {
 
     private boolean isActive = true; // fe - do blokowania użytkownika
 
-    @ManyToMany() // default -> EAGER = jak pobierasz usera pobierz od razu jego role
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -1,18 +1,15 @@
 package com.projekt.cinemabooking.config;
 
 
-import com.projekt.cinemabooking.entity.Movie;
-import com.projekt.cinemabooking.entity.Seat;
-import com.projekt.cinemabooking.entity.TheaterRoom;
-import com.projekt.cinemabooking.entity.User;
+import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.MovieGenre;
-import com.projekt.cinemabooking.repository.MovieRepository;
-import com.projekt.cinemabooking.repository.SeatRepository;
-import com.projekt.cinemabooking.repository.TheaterRoomRepository;
-import com.projekt.cinemabooking.repository.UserRepository;
+import com.projekt.cinemabooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +19,8 @@ public class DataInitializer implements CommandLineRunner {
     private final TheaterRoomRepository theaterRoomRepository;
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -73,12 +72,20 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         if (userRepository.count() == 0) {
+
+            Role roleUser = roleRepository.findByName("ROLE_USER")
+                    .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_USER")));
+
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN")
+                    .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_ADMIN")));
+
             User user = User.builder()
                     .email("klient@kino.pl")
-                    .password("haslo123")
+                    .password(passwordEncoder.encode("haslo123"))
                     .firstName("Jan")
                     .lastName("Kowalski")
                     .isActive(true)
+                    .roles(Set.of(roleUser))
                     .build();
 
             userRepository.save(user);

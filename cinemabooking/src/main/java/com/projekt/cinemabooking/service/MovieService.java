@@ -7,6 +7,8 @@ import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.mapper.MovieMapper;
 import com.projekt.cinemabooking.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,12 @@ public class MovieService {
         return movieRepository.findAll().stream()
                 .map(movieMapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MovieDto> getMoviesPage(Pageable pageable) {
+        return movieRepository.findAll(pageable)
+                .map(movieMapper::mapToDto);
     }
 
     @Transactional

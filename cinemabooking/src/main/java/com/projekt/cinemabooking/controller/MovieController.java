@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,12 @@ public class MovieController {
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         List<MovieDto> movies = movieService.getAllMovies();
         return ResponseEntity.ok(movies);
+    }
+
+    @Operation(summary = "Pobierz listę filmów (z paginacją)")
+    @GetMapping("/all")
+    public ResponseEntity<Page<MovieDto>> getAllMovies(@ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(movieService.getMoviesPage(pageable));
     }
 
     @Operation(summary = "Pobierz szczegóły filmu", description = "Zwraca pełne dane filmu na podstawie jego ID.")

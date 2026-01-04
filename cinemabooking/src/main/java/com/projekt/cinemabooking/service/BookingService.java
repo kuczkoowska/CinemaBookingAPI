@@ -24,6 +24,7 @@ public class BookingService {
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
     private final SalesStatisticsRepository salesStatisticsRepository;
+    private final LogRepository logRepository;
 
     @Transactional
     public Long createBooking(CreateBookingDto createBookingDto) {
@@ -66,7 +67,7 @@ public class BookingService {
 
         booking.setTotalAmount(totalAmount);
         Booking savedBooking = bookingRepository.save(booking);
-        salesStatisticsRepository.logAction("Sprzedano bilet!");
+        logRepository.saveLog("BOOKING", "Utworzono rezerwację nr " + savedBooking.getId(), user.getEmail());
         return savedBooking.getId();
     }
 

@@ -16,7 +16,16 @@ import java.util.List;
 public class SalesStatisticsRepository {
     private final JdbcTemplate jdbcTemplate;
 
-    public List<SalesStatsDto> getSalesByDate() {
+    public List<SalesStatsDto> getSalesByDate(String sortBy, String sortDir) {
+
+        String orderByColumn = switch (sortBy) {
+            case "revenue" -> "revenue";
+            case "tickets" -> "tickets_count";
+            default -> "sale_date";
+        };
+
+        String direction = sortDir.equalsIgnoreCase("ASC") ? "ASC" : "DESC";
+
         String sql = """
                     SELECT 
                         CAST(b.booking_time AS DATE) as sale_date, 
@@ -26,22 +35,10 @@ public class SalesStatisticsRepository {
                     JOIN tickets t ON b.id = t.booking_id
                     WHERE b.status = 'OPLACONA'
                     GROUP BY CAST(b.booking_time AS DATE)
-                    ORDER BY sale_date DESC
-                """;
+                    ORDER BY %s %s
+                """.formatted(orderByColumn, direction);
 
         return jdbcTemplate.query(sql, new SalesStatsRowMapper());
-    }
-
-    public void logAction(String message) {
-        String sql = "INSERT INTO system_logs (message, created_at) VALUES (?, CURRENT_TIMESTAMP)";
-        jdbcTemplate.update(sql, message);
-    }
-
-    public List<String> getAllSystemLogs() {
-        String sql = "SELECT message, created_at FROM system_logs ORDER BY created_at DESC";
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                rs.getString("message") + " (" + rs.getTimestamp("created_at") + ")"
-        );
     }
 
     private static class SalesStatsRowMapper implements RowMapper<SalesStatsDto> {

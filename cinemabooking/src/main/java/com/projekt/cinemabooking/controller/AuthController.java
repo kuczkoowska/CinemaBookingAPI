@@ -3,6 +3,7 @@ package com.projekt.cinemabooking.controller;
 import com.projekt.cinemabooking.dto.user.RegisterDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
+import com.projekt.cinemabooking.repository.LogRepository;
 import com.projekt.cinemabooking.repository.RoleRepository;
 import com.projekt.cinemabooking.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LogRepository logRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterDto registerDto) {
@@ -43,11 +45,13 @@ public class AuthController {
 
         userRepository.save(user);
 
+        logRepository.saveLog("AUTH_REGISTER", "Zarejestrowano użytkownika", user.getEmail());
         return ResponseEntity.ok("Rejestracja udana!");
     }
 
     @GetMapping("/login")
     public ResponseEntity<String> login(Authentication authentication) {
+        logRepository.saveLog("AUTH_SUCCESS", "Zalogowano poprawnie", authentication.getName());
         return ResponseEntity.ok("Zalogowano pomyślnie! Witaj " + authentication.getName());
     }
 }

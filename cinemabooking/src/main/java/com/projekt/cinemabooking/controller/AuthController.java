@@ -3,11 +3,13 @@ package com.projekt.cinemabooking.controller;
 import com.projekt.cinemabooking.dto.user.RegisterDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
+import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.repository.LogRepository;
 import com.projekt.cinemabooking.repository.RoleRepository;
 import com.projekt.cinemabooking.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +34,7 @@ public class AuthController {
         }
 
         Role roleUser = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Rola nie znaleziona"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rola ROLE_USER nie została znaleziona w bazie"));
 
         User user = User.builder()
                 .email(registerDto.getEmail())
@@ -46,7 +48,9 @@ public class AuthController {
         userRepository.save(user);
 
         logRepository.saveLog("AUTH_REGISTER", "Zarejestrowano użytkownika", user.getEmail());
-        return ResponseEntity.ok("Rejestracja udana!");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("Rejestracja udana! Możesz się zalogować.");
     }
 
     @GetMapping("/login")

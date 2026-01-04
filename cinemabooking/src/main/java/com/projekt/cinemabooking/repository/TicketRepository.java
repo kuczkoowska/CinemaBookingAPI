@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    List<Ticket> findByBookingId(Long bookingId);
+    List<Ticket> findAllByScreeningId(Long screeningId);
 
     @Query("SELECT COUNT(t) > 0 FROM Ticket t JOIN t.booking b " +
             "WHERE t.screening.id = :screeningId " +

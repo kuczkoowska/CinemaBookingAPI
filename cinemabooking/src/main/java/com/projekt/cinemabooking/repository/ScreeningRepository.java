@@ -10,9 +10,7 @@ import java.util.List;
 
 public interface ScreeningRepository extends JpaRepository<Screening, Long> {
 
-    List<Screening> findByMovieId(Long movieId);
-
-    List<Screening> findByStartTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<Screening> findByMovieIdAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end);
 
     @Query("SELECT s FROM Screening s WHERE s.theaterRoom.id = :roomId " +
             "AND s.startTime < :endTime " +

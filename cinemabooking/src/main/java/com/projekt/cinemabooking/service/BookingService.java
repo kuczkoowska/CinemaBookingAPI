@@ -1,8 +1,8 @@
 package com.projekt.cinemabooking.service;
 
 import com.projekt.cinemabooking.dto.booking.BookingDto;
-import com.projekt.cinemabooking.dto.booking.CreateBookingDto;
-import com.projekt.cinemabooking.dto.ticket.CreateTicketDto;
+import com.projekt.cinemabooking.dto.seat.LockSeatsDto;
+import com.projekt.cinemabooking.dto.ticket.UpdateTicketTypeDto;
 import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import com.projekt.cinemabooking.entity.enums.TicketType;
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,59 +29,81 @@ public class BookingService {
     private final UserRepository userRepository;
     private final LogRepository logRepository;
     private final BookingMapper bookingMapper;
+    private final TicketPriceRepository ticketPriceRepository;
+
 
     @Transactional
-    public Long createBooking(CreateBookingDto createBookingDto) {
+    public Long lockSeats(LockSeatsDto dto) {
 
-        Screening screening = screeningRepository.findById(createBookingDto.getScreeningId()).orElseThrow(() -> new ResourceNotFoundException("Seans", createBookingDto.getScreeningId()));
+        Screening screening = screeningRepository.findById(dto.getScreeningId()).orElseThrow(() -> new ResourceNotFoundException("Seans", dto.getScreeningId()));
 
-        User user = userRepository.findById(createBookingDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("Użytkownik", createBookingDto.getUserId()));
+        User user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User", dto.getUserId()));
 
         Booking booking = new Booking();
         booking.setBookingTime(LocalDateTime.now());
-        booking.setStatus(BookingStatus.OPLACONA);
+        booking.setStatus(BookingStatus.OCZEKUJE);
+        booking.setExpirationTime(LocalDateTime.now().plusMinutes(15));
         booking.setUser(user);
         booking.setTickets(new ArrayList<>());
 
-        double totalAmount = 0.0;
+        double tempTotal = 0.0;
 
-        for (CreateTicketDto ticketDto : createBookingDto.getTickets()) {
-            Seat seat = seatRepository.findById(ticketDto.getSeatId()).orElseThrow(() -> new ResourceNotFoundException("Miejsce", ticketDto.getSeatId()));
+        for (Long seatId : dto.getSeatIds()) {
+            Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Miejsce", seatId));
 
-            boolean isTaken = ticketRepository.existsByScreeningIdAndSeatId(screening.getId(), seat.getId());
-
-            if (isTaken) {
-                throw new SeatAlreadyTakenException("Miejsce numer " + seat.getSeatNumber() + " w rzędzie " + seat.getRowNumber() + " jest już zajęte!");
+            if (ticketRepository.existsByScreeningIdAndSeatId(screening.getId(), seatId)) {
+                throw new SeatAlreadyTakenException("Miejsce " + seat.getSeatNumber() + " zajęte!");
             }
 
             Ticket ticket = new Ticket();
-            ticket.setTicketType(ticketDto.getTicketType());
             ticket.setScreening(screening);
             ticket.setSeat(seat);
             ticket.setBooking(booking);
 
-            double price = calculatePrice(ticketDto.getTicketType());
+            ticket.setTicketType(TicketType.NORMALNY);
+            double price = getPriceForType(TicketType.NORMALNY);
             ticket.setPrice(price);
-
-            totalAmount += price;
+            tempTotal += price;
 
             booking.getTickets().add(ticket);
         }
 
-        booking.setTotalAmount(totalAmount);
-        Booking savedBooking = bookingRepository.save(booking);
-        logRepository.saveLog("BOOKING", "Utworzono rezerwację nr " + savedBooking.getId(), user.getEmail());
-        return savedBooking.getId();
+        booking.setTotalAmount(tempTotal);
+        return bookingRepository.save(booking).getId();
     }
 
-    private double calculatePrice(TicketType ticketType) {
-        switch (ticketType) {
-            case ULGOWY:
-                return 15.00;
-            case NORMALNY:
-            default:
-                return 25.00;
+    @Transactional
+    public BookingDto updateTicketTypes(Long bookingId, List<UpdateTicketTypeDto> updates) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
+
+        if (booking.getStatus() != BookingStatus.OCZEKUJE) {
+            throw new IllegalStateException("Nie można edytować zatwierdzonej rezerwacji");
         }
+
+        double newTotal = 0.0;
+
+        for (Ticket ticket : booking.getTickets()) {
+            for (UpdateTicketTypeDto update : updates) {
+                if (ticket.getId().equals(update.getTicketId())) {
+                    ticket.setTicketType(update.getNewType());
+
+                    TicketType newType = update.getNewType();
+                    ticket.setPrice(getPriceForType(newType));
+                }
+            }
+            newTotal += ticket.getPrice();
+        }
+
+        booking.setTotalAmount(newTotal);
+        bookingRepository.save(booking);
+
+        return bookingMapper.mapToDto(booking);
+    }
+
+    private double getPriceForType(TicketType type) {
+        return ticketPriceRepository.findByTicketType(type)
+                .map(TicketPrice::getPrice)
+                .orElseThrow(() -> new RuntimeException("Brak ceny w systemie dla typu: " + type));
     }
 
     @Transactional
@@ -118,5 +141,27 @@ public class BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
 
         return bookingMapper.mapToDto(booking);
+    }
+
+    @Transactional
+    public void confirmBooking(Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
+
+        if (booking.getStatus() == BookingStatus.ANULOWANA) {
+            throw new IllegalArgumentException("Rezerwacja wygasła lub została anulowana.");
+        }
+
+        if (booking.getExpirationTime() != null && LocalDateTime.now().isAfter(booking.getExpirationTime())) {
+            booking.setStatus(BookingStatus.ANULOWANA);
+            bookingRepository.save(booking);
+            throw new IllegalArgumentException("Czas na dokończenie rezerwacji minął.");
+        }
+
+        booking.setStatus(BookingStatus.OPLACONA);
+        booking.setExpirationTime(null);
+
+        bookingRepository.save(booking);
+        logRepository.saveLog("BOOKING_CONFIRM", "Opłacono rezerwację nr " + bookingId, booking.getUser().getEmail());
     }
 }

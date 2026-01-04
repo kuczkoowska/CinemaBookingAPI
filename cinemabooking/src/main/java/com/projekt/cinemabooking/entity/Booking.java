@@ -34,4 +34,7 @@ public class Booking {
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<Ticket> tickets;
+
+    @Column(name = "expiration_time")
+    private LocalDateTime expirationTime;
 }

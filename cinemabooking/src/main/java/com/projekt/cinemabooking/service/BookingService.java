@@ -6,6 +6,7 @@ import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import com.projekt.cinemabooking.entity.enums.TicketType;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
+import com.projekt.cinemabooking.exception.SeatAlreadyTakenException;
 import com.projekt.cinemabooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,9 +48,8 @@ public class BookingService {
             boolean isTaken = ticketRepository.existsByScreeningIdAndSeatId(screening.getId(), seat.getId());
 
             if (isTaken) {
-                throw new RuntimeException("Miejsce numer " + seat.getSeatNumber() + " w rzędzie " + seat.getRowNumber() + " jest już zajęte!");
+                throw new SeatAlreadyTakenException("Miejsce numer " + seat.getSeatNumber() + " w rzędzie " + seat.getRowNumber() + " jest już zajęte!");
             }
-
 
             Ticket ticket = new Ticket();
             ticket.setTicketType(ticketDto.getTicketType());
@@ -79,5 +79,34 @@ public class BookingService {
             default:
                 return 25.00;
         }
+    }
+
+    @Transactional
+    public void cancelBooking(Long bookingId, String userEmail) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
+
+        if (!booking.getUser().getEmail().equals(userEmail)) {
+            throw new IllegalArgumentException("Nie możesz anulować cudzej rezerwacji!");
+        }
+
+        if (booking.getStatus() == BookingStatus.ANULOWANA) {
+            throw new IllegalArgumentException("Ta rezerwacja jest już anulowana.");
+        }
+
+        LocalDateTime screeningStartTime = booking.getTickets().getFirst().getScreening().getStartTime();
+        LocalDateTime deadline = screeningStartTime.minusMinutes(30);
+
+        if (screeningStartTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Nie można anulować rezerwacji na seans, który już się zaczął.");
+        }
+
+        if (LocalDateTime.now().isAfter(deadline)) {
+            throw new IllegalArgumentException("Zbyt późno na zmiany. Rezerwację można edytować najpóźniej 30 minut przed seansem.");
+        }
+
+        booking.setStatus(BookingStatus.ANULOWANA);
+        bookingRepository.save(booking);
+        logRepository.saveLog("BOOKING_CANCEL", "Anulowano rezerwację nr " + bookingId, userEmail);
     }
 }

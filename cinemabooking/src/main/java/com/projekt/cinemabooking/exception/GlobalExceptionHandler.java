@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
+    //409
+    @ExceptionHandler(SeatAlreadyTakenException.class)
+    public ResponseEntity<Map<String, Object>> handleSeatAlreadyTakenException(SeatAlreadyTakenException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());

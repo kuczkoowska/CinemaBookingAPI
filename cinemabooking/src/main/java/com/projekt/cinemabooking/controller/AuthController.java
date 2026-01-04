@@ -8,11 +8,9 @@ import com.projekt.cinemabooking.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -46,5 +44,10 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Rejestracja udana!");
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<String> login(Authentication authentication) {
+        return ResponseEntity.ok("Zalogowano pomyślnie! Witaj " + authentication.getName());
     }
 }

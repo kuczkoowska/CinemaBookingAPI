@@ -3,6 +3,7 @@ package com.projekt.cinemabooking.service;
 import com.projekt.cinemabooking.dto.movie.CreateMovieDto;
 import com.projekt.cinemabooking.dto.movie.MovieDto;
 import com.projekt.cinemabooking.entity.Movie;
+import com.projekt.cinemabooking.entity.enums.MovieGenre;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.mapper.MovieMapper;
 import com.projekt.cinemabooking.repository.MovieRepository;
@@ -30,9 +31,15 @@ public class MovieService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MovieDto> getMoviesPage(Pageable pageable) {
-        return movieRepository.findAll(pageable)
-                .map(movieMapper::mapToDto);
+    public Page<MovieDto> getMovies(String title, String genreName, Pageable pageable) {
+        MovieGenre genre = null;
+        if (genreName != null) {
+            genre = MovieGenre.valueOf(genreName);
+        }
+
+        Page<Movie> movies = movieRepository.searchMovies(title, genre, pageable);
+
+        return movies.map(movieMapper::mapToDto);
     }
 
     @Transactional

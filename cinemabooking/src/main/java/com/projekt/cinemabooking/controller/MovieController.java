@@ -25,17 +25,21 @@ public class MovieController {
 
     private final MovieService movieService;
 
-    @Operation(summary = "Pobierz listę filmów", description = "Zwraca listę wszystkich dostępnych filmów.")
+    @Operation(summary = "Pobierz listę filmów (z paginacją)")
     @GetMapping
+    public ResponseEntity<Page<MovieDto>> getAllMovies(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String genre,
+            @ParameterObject Pageable pageable
+    ) {
+        return ResponseEntity.ok(movieService.getMovies(title, genre, pageable));
+    }
+
+    @Operation(summary = "Pobierz listę filmów", description = "Zwraca listę wszystkich dostępnych filmów. Frontend")
+    @GetMapping("/front")
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         List<MovieDto> movies = movieService.getAllMovies();
         return ResponseEntity.ok(movies);
-    }
-
-    @Operation(summary = "Pobierz listę filmów (z paginacją)")
-    @GetMapping("/all")
-    public ResponseEntity<Page<MovieDto>> getAllMovies(@ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(movieService.getMoviesPage(pageable));
     }
 
     @Operation(summary = "Pobierz szczegóły filmu", description = "Zwraca pełne dane filmu na podstawie jego ID.")
@@ -56,7 +60,7 @@ public class MovieController {
     }
 
     @Operation(summary = "Edytuj dane filmu", description = "Edytuje dane filmu na podstawie jego ID.")
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<MovieDto> updateMovie(@Valid @RequestBody CreateMovieDto movieDto, @PathVariable Long id) {
         MovieDto movie = movieService.updateMovie(id, movieDto);
         return ResponseEntity.ok(movie);
@@ -68,7 +72,8 @@ public class MovieController {
             @ApiResponse(responseCode = "404", description = "Film o podanym ID nie istnieje")
     })
     @DeleteMapping("/{id}")
-    public void deleteMovie(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteMovie(@PathVariable Long id) {
         movieService.deleteMovie(id);
+        return ResponseEntity.noContent().build();
     }
 }

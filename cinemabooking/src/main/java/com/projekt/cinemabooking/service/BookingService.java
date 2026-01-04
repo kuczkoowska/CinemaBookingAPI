@@ -1,12 +1,14 @@
 package com.projekt.cinemabooking.service;
 
+import com.projekt.cinemabooking.dto.booking.BookingDto;
 import com.projekt.cinemabooking.dto.booking.CreateBookingDto;
-import com.projekt.cinemabooking.dto.ticket.TicketDto;
+import com.projekt.cinemabooking.dto.ticket.CreateTicketDto;
 import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import com.projekt.cinemabooking.entity.enums.TicketType;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.exception.SeatAlreadyTakenException;
+import com.projekt.cinemabooking.mapper.BookingMapper;
 import com.projekt.cinemabooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,8 @@ public class BookingService {
     private final TicketRepository ticketRepository;
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
-    private final SalesStatisticsRepository salesStatisticsRepository;
     private final LogRepository logRepository;
+    private final BookingMapper bookingMapper;
 
     @Transactional
     public Long createBooking(CreateBookingDto createBookingDto) {
@@ -42,7 +44,7 @@ public class BookingService {
 
         double totalAmount = 0.0;
 
-        for (TicketDto ticketDto : createBookingDto.getTickets()) {
+        for (CreateTicketDto ticketDto : createBookingDto.getTickets()) {
             Seat seat = seatRepository.findById(ticketDto.getSeatId()).orElseThrow(() -> new ResourceNotFoundException("Miejsce", ticketDto.getSeatId()));
 
             boolean isTaken = ticketRepository.existsByScreeningIdAndSeatId(screening.getId(), seat.getId());
@@ -108,5 +110,13 @@ public class BookingService {
         booking.setStatus(BookingStatus.ANULOWANA);
         bookingRepository.save(booking);
         logRepository.saveLog("BOOKING_CANCEL", "Anulowano rezerwację nr " + bookingId, userEmail);
+    }
+
+    @Transactional(readOnly = true)
+    public BookingDto getBookingById(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
+
+        return bookingMapper.mapToDto(booking);
     }
 }

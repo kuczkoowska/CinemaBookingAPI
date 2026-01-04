@@ -1,5 +1,6 @@
 package com.projekt.cinemabooking.controller;
 
+import com.projekt.cinemabooking.dto.booking.BookingDto;
 import com.projekt.cinemabooking.dto.booking.CreateBookingDto;
 import com.projekt.cinemabooking.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,5 +31,12 @@ public class BookingController {
     public ResponseEntity<Void> cancelBooking(@PathVariable Long id, Authentication authentication) {
         bookingService.cancelBooking(id, authentication.getName());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Zobacz szczegóły rezerwacji")
+    @GetMapping("/{id}")
+    public ResponseEntity<BookingDto> getBooking(@PathVariable Long id) {
+        BookingDto booking = bookingService.getBookingById(id);
+        return ResponseEntity.ok(booking);
     }
 }

@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.dto.booking;
 
-import com.projekt.cinemabooking.dto.ticket.TicketDto;
+import com.projekt.cinemabooking.dto.ticket.CreateTicketDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -21,5 +21,5 @@ public class CreateBookingDto {
     private Long userId;
 
     @NotEmpty(message = "Lista biletów nie może być pusta")
-    private List<TicketDto> tickets;
+    private List<CreateTicketDto> tickets;
 }

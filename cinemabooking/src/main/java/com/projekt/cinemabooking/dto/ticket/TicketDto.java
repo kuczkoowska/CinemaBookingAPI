@@ -1,7 +1,5 @@
 package com.projekt.cinemabooking.dto.ticket;
 
-import com.projekt.cinemabooking.entity.enums.TicketType;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -11,9 +9,10 @@ import lombok.*;
 @Builder
 public class TicketDto {
 
-    @NotNull(message = "Musisz wybrać miejsce")
+    private Long id;
     private Long seatId;
-
-    @NotNull(message = "Musisz wybrać typ biletu")
-    private TicketType ticketType;
+    private int row;
+    private int seatNumber;
+    private String type;
+    private double price;
 }

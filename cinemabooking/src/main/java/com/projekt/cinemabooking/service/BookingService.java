@@ -29,9 +29,9 @@ public class BookingService {
     @Transactional
     public Long createBooking(CreateBookingDto createBookingDto) {
 
-        Screening screening = screeningRepository.findById(createBookingDto.getScreeningId()).orElseThrow(() -> new ResourceNotFoundException(createBookingDto.getScreeningId()));
+        Screening screening = screeningRepository.findById(createBookingDto.getScreeningId()).orElseThrow(() -> new ResourceNotFoundException("Seans", createBookingDto.getScreeningId()));
 
-        User user = userRepository.findById(createBookingDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException(createBookingDto.getUserId()));
+        User user = userRepository.findById(createBookingDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("Użytkownik", createBookingDto.getUserId()));
 
         Booking booking = new Booking();
         booking.setBookingTime(LocalDateTime.now());
@@ -42,7 +42,7 @@ public class BookingService {
         double totalAmount = 0.0;
 
         for (TicketDto ticketDto : createBookingDto.getTickets()) {
-            Seat seat = seatRepository.findById(ticketDto.getSeatId()).orElseThrow(() -> new ResourceNotFoundException(ticketDto.getSeatId()));
+            Seat seat = seatRepository.findById(ticketDto.getSeatId()).orElseThrow(() -> new ResourceNotFoundException("Miejsce", ticketDto.getSeatId()));
 
             boolean isTaken = ticketRepository.existsByScreeningIdAndSeatId(screening.getId(), seat.getId());
 

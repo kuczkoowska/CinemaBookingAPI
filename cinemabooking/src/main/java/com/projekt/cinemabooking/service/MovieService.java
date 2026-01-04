@@ -46,7 +46,7 @@ public class MovieService {
     @Transactional(readOnly = true)
     public MovieDto getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+                .orElseThrow(() -> new ResourceNotFoundException("Film", id));
 
         return movieMapper.mapToDto(movie);
     }
@@ -54,7 +54,7 @@ public class MovieService {
     @Transactional
     public MovieDto updateMovie(Long id, CreateMovieDto movieDto) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+                .orElseThrow(() -> new ResourceNotFoundException("Film", id));
 
         movieMapper.updateMovieFromDto(movieDto, movie);
 
@@ -66,7 +66,7 @@ public class MovieService {
     @Transactional
     public void deleteMovie(Long id) {
         if (!movieRepository.existsById(id)) {
-            throw new ResourceNotFoundException(id);
+            throw new ResourceNotFoundException("Film", id);
         }
         movieRepository.deleteById(id);
     }

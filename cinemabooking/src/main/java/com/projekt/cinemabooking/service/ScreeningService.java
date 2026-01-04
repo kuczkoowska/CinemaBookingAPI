@@ -27,9 +27,9 @@ public class ScreeningService {
 
     @Transactional
     public Long createScreening(CreateScreeningDto createScreeningDto) {
-        Movie movie = movieRepository.findById(createScreeningDto.getMovieId()).orElseThrow(() -> new ResourceNotFoundException(createScreeningDto.getMovieId()));
+        Movie movie = movieRepository.findById(createScreeningDto.getMovieId()).orElseThrow(() -> new ResourceNotFoundException("Film", createScreeningDto.getMovieId()));
 
-        TheaterRoom room = theaterRoomRepository.findById(createScreeningDto.getTheaterRoomId()).orElseThrow(() -> new ResourceNotFoundException(createScreeningDto.getTheaterRoomId()));
+        TheaterRoom room = theaterRoomRepository.findById(createScreeningDto.getTheaterRoomId()).orElseThrow(() -> new ResourceNotFoundException("Sala", createScreeningDto.getTheaterRoomId()));
 
         Screening screening = new Screening();
         screeningMapper.updateScreeningFromDto(createScreeningDto, screening);

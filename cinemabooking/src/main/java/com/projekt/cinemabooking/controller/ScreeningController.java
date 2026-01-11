@@ -40,8 +40,8 @@ public class ScreeningController {
 
     @Operation(summary = "Pobierz seanse dla filmu", description = "Zwraca listę godzin seansów dla konkretnego filmu")
     @GetMapping("/movie/{movieId}")
-    public ResponseEntity<List<ScreeningDto>> getScreeningByMovieId(@PathVariable Long id, @RequestParam(required = false) LocalDate date) {
-        List<ScreeningDto> screenings = screeningService.findByMovieId(id, date);
+    public ResponseEntity<List<ScreeningDto>> getScreeningByMovieId(@PathVariable Long movieId, @RequestParam(required = false) LocalDate date) {
+        List<ScreeningDto> screenings = screeningService.findByMovieId(movieId, date);
         return ResponseEntity.ok(screenings);
     }
 
@@ -60,4 +60,7 @@ public class ScreeningController {
     public ResponseEntity<List<SeatDto>> getSeatsForScreening(@PathVariable Long id) {
         return ResponseEntity.ok(screeningService.getSeatsForScreening(id));
     }
+
+    // usun
+
 }

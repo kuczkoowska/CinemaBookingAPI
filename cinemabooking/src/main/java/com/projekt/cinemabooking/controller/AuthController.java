@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.controller;
 
-import com.projekt.cinemabooking.dto.user.RegisterDto;
+import com.projekt.cinemabooking.dto.auth.RegisterDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,9 +52,13 @@ public class AuthController {
                 .body("Rejestracja udana! Możesz się zalogować.");
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<String> login(Authentication authentication) {
-        logRepository.saveLog("AUTH_SUCCESS", "Zalogowano poprawnie", authentication.getName());
-        return ResponseEntity.ok("Zalogowano pomyślnie! Witaj " + authentication.getName());
+    @GetMapping("/success")
+    public ResponseEntity<String> loginSuccess() {
+        return ResponseEntity.ok("Zalogowano pomyślnie!");
+    }
+
+    @GetMapping("/failure")
+    public ResponseEntity<String> loginFailure() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Błędny login lub hasło");
     }
 }

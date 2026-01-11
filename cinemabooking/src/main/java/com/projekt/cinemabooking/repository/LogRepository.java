@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +15,8 @@ public class LogRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public void saveLog(String type, String message, String email) {
-        String sql = "INSERT INTO system_logs (type, message, user_email, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
-        jdbcTemplate.update(sql, type, message, email);
+        String sql = "INSERT INTO system_logs (type, message, user_email, created_at) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, type, message, email, LocalDateTime.now());
     }
 
     public List<Map<String, Object>> getLogsByType(String type) {

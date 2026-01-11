@@ -22,4 +22,6 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
     boolean existsByTheaterRoomId(Long theaterRoomId);
 
     boolean existsByTheaterRoomIdAndStartTimeAfter(Long theaterRoomId, LocalDateTime time);
+
+    List<Screening> findByMovieIdAndStartTimeAfter(Long id, LocalDateTime now);
 }

@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto.user;
+package com.projekt.cinemabooking.dto.auth;
 
 import lombok.Data;
 

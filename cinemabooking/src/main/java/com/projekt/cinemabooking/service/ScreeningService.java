@@ -72,9 +72,8 @@ public class ScreeningService {
             screenings = screeningRepository.findByMovieIdAndStartTimeBetween(id, startOfDay, endOfDay);
         } else {
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime endOfDay = now.toLocalDate().atTime(LocalTime.MAX);
 
-            screenings = screeningRepository.findByMovieIdAndStartTimeBetween(id, now, endOfDay);
+            screenings = screeningRepository.findByMovieIdAndStartTimeAfter(id, now);
         }
 
         return screenings.stream()

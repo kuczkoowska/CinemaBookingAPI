@@ -9,9 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class RegisterDto {
     @NotBlank(message = "Email jest wymagany")
     @Email(message = "Niepoprawny format email")

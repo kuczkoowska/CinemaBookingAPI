@@ -8,9 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UpdateUserDto {
     @NotBlank(message = "Imię nie może być puste")
     private String firstName;

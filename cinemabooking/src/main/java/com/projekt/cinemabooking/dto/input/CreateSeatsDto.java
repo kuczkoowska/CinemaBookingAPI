@@ -7,9 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CreateSeatsDto {
     @Min(value = 1, message = "Liczba rzędów musi być dodatnia")
     private int rows;

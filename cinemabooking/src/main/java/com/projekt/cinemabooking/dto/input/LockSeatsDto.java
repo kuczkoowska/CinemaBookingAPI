@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class LockSeatsDto {
     @NotNull(message = "Musisz podać ID seansu")
     private Long screeningId;

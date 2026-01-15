@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto.screening;
+package com.projekt.cinemabooking.dto.input;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;

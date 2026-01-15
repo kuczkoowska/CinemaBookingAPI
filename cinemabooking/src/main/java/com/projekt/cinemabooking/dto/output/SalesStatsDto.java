@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto.admin;
+package com.projekt.cinemabooking.dto.output;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

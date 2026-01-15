@@ -1,9 +1,9 @@
-package com.projekt.cinemabooking.dto.booking;
+package com.projekt.cinemabooking.dto.output;
 
-import com.projekt.cinemabooking.dto.ticket.TicketDto;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class BookingDto {
     private Long id;
     private LocalDateTime bookingTime;
     private BookingStatus status;
-    private double totalAmount;
+    private BigDecimal totalAmount;
 
     private String movieTitle;
     private String theaterRoomName;

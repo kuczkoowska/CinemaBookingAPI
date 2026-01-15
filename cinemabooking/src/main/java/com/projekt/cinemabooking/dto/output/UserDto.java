@@ -1,11 +1,10 @@
-package com.projekt.cinemabooking.dto.auth;
+package com.projekt.cinemabooking.dto.output;
 
 import lombok.Data;
 
 @Data
-public class RegisterDto {
+public class UserDto {
     private String email;
-    private String password;
     private String firstName;
     private String lastName;
 }

@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto.movie;
+package com.projekt.cinemabooking.dto.input;
 
 import com.projekt.cinemabooking.entity.enums.MovieGenre;
 import jakarta.validation.constraints.Min;

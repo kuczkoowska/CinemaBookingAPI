@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.dto.seat;
+package com.projekt.cinemabooking.dto.output;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

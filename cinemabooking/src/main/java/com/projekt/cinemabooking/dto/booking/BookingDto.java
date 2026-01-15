@@ -18,10 +18,11 @@ public class BookingDto {
     private LocalDateTime bookingTime;
     private BookingStatus status;
     private double totalAmount;
-    
+
     private String movieTitle;
     private String theaterRoomName;
     private LocalDateTime screeningTime;
 
     private List<TicketDto> tickets;
+    private LocalDateTime expirationTime;
 }

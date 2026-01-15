@@ -37,4 +37,19 @@ public class Booking {
 
     @Column(name = "expiration_time")
     private LocalDateTime expirationTime;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.bookingTime == null) {
+            this.bookingTime = LocalDateTime.now();
+        }
+
+        if (this.status == null) {
+            this.status = BookingStatus.OCZEKUJE;
+        }
+
+        if (this.expirationTime == null) {
+            this.expirationTime = this.bookingTime.plusMinutes(15);
+        }
+    }
 }

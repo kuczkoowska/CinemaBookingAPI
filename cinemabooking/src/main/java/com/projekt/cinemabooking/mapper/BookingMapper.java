@@ -34,9 +34,12 @@ public class BookingMapper {
                 .movieTitle(movieTitle)
                 .theaterRoomName(roomName)
                 .screeningTime(screeningTime)
-                .tickets(booking.getTickets().stream()
+                .expirationTime(booking.getExpirationTime())
+                .tickets(booking.getTickets() != null
+                        ? booking.getTickets().stream()
                         .map(ticketMapper::mapToDto)
-                        .toList())
+                        .toList()
+                        : java.util.List.of())
                 .build();
     }
 

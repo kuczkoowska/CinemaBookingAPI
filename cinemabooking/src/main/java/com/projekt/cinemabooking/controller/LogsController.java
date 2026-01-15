@@ -22,7 +22,7 @@ public class LogsController {
 
 
     @Operation(summary = "Logi systemowe", description = "Wyświetla historię zdarzeń")
-    @GetMapping("/logs")
+    @GetMapping()
     public ResponseEntity<List<Map<String, Object>>> getSystemLogs() {
         return ResponseEntity.ok(logRepository.getAllLogs());
     }

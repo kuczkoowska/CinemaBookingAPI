@@ -45,6 +45,7 @@ public class ScreeningController {
         return ResponseEntity.ok(screenings);
     }
 
+    //zalogowany
     @Operation(summary = "Pobierz szczegóły seansu", description = "Zwraca szczegóły pojedynczego seansu (sala, film, godzina) na podstawie ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Znaleziono seans"),
@@ -55,12 +56,13 @@ public class ScreeningController {
         return ResponseEntity.ok(screeningService.getScreeningById(id));
     }
 
+    //zalogowany
     @Operation(summary = "Pobierz dostępność miejsc", description = "Zwraca mapę miejsc dla seansu z informacją, które są wolne.")
     @GetMapping("/{id}/seats")
     public ResponseEntity<List<SeatDto>> getSeatsForScreening(@PathVariable Long id) {
         return ResponseEntity.ok(screeningService.getSeatsForScreening(id));
     }
 
-    // usun
+    // usun ??
 
 }

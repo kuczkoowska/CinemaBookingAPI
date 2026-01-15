@@ -9,10 +9,10 @@ import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.mapper.UserMapper;
 import com.projekt.cinemabooking.repository.RoleRepository;
 import com.projekt.cinemabooking.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,16 +25,11 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+
     public List<UserAdminDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::mapToAdminDto)
                 .toList();
-    }
-
-    public UserDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik nie istnieje"));
-        return userMapper.mapToDto(user);
     }
 
     public UserAdminDto getUserById(Long id) {
@@ -44,36 +39,24 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto updateUser(String email, UpdateUserDto dto) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik nie istnieje"));
-
-        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
-        if (dto.getPassword() != null) user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        return userMapper.mapToDto(userRepository.save(user));
-    }
-
-    @Transactional
     public UserAdminDto updateUserAsAdmin(Long id, UpdateUserDto dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
 
-        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
-        if (dto.getPassword() != null) user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
+        applyUpdates(user, dto);
         User savedUser = userRepository.save(user);
 
         return userMapper.mapToAdminDto(savedUser);
     }
 
-
     @Transactional
-    public void toggleBlockUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
+    public void toggleBlockUser(Long targetId, Long currentAdminId) {
+        if (targetId.equals(currentAdminId)) {
+            throw new IllegalArgumentException("Nie możesz zablokować własnego konta!");
+        }
+
+        User user = userRepository.findById(targetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", targetId));
 
         user.setActive(!user.isActive());
         userRepository.save(user);
@@ -81,12 +64,44 @@ public class UserService {
 
     @Transactional
     public void promoteToAdmin(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
 
-        Role adminRole = roleRepository.findByName("ADMIN").orElseThrow(() -> new RuntimeException("Rola ADMIN nie została znaleziona w bazie"));
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseThrow(() -> new RuntimeException("Rola ROLE_ADMIN nie została znaleziona w bazie"));
 
-        user.getRoles().add(adminRole);
-        userRepository.save(user);
+        if (!user.getRoles().contains(adminRole)) {
+            user.getRoles().add(adminRole);
+            userRepository.save(user);
+        }
     }
 
+
+    public UserDto getUserDtoById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
+        return userMapper.mapToDto(user);
+    }
+
+    @Transactional
+    public UserDto updateUser(Long id, UpdateUserDto dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", id));
+
+        applyUpdates(user, dto);
+        return userMapper.mapToDto(userRepository.save(user));
+    }
+
+
+    private void applyUpdates(User user, UpdateUserDto dto) {
+        if (dto.getFirstName() != null && !dto.getFirstName().isBlank()) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null && !dto.getLastName().isBlank()) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+    }
 }

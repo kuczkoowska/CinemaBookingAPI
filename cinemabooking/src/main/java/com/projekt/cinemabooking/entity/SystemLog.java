@@ -1,9 +1,14 @@
 package com.projekt.cinemabooking.entity;
 
+import com.projekt.cinemabooking.entity.enums.LogType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "system_logs")
@@ -18,13 +23,17 @@ public class SystemLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @NotNull
+    private LogType type;
 
-    @Column(columnDefinition = "TEXT")
+    @NotBlank(message = "Treść logu nie może być pusta")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    @Column(length = 255)
+    @Email
+    @Column(length = 100)
     private String userEmail;
 
     @Column(nullable = false, updatable = false)

@@ -1,10 +1,9 @@
 package com.projekt.cinemabooking.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,22 +12,29 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "screenings")
 public class Screening {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Czas rozpoczęcia jest wymagany")
+    @Future(message = "Seans nie może odbyć się w przeszłości")
+    @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @ManyToOne
-    @JoinColumn(name = "movie_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie_id", nullable = false)
+    @NotNull(message = "Film jest wymagany")
     private Movie movie;
 
-    @ManyToOne
-    @JoinColumn(name = "theater_room_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theater_room_id", nullable = false)
+    @NotNull(message = "Sala jest wymagana")
     private TheaterRoom theaterRoom;
 
+    @Column(nullable = false)
     private LocalDateTime endTime;
 
     @PrePersist

@@ -1,6 +1,8 @@
 package com.projekt.cinemabooking.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.HashSet;
@@ -18,19 +20,22 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Email
+    @NotBlank
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @NotBlank
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 50)
+    @Column(nullable = false, length = 50)
     private String firstName;
 
-    @Column(length = 50)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
-    private boolean isActive = true; // fe - do blokowania użytkownika
+    private boolean isActive = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -39,5 +44,4 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
-
 }

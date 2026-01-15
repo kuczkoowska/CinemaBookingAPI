@@ -1,25 +1,29 @@
 package com.projekt.cinemabooking.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "seats")
+@Builder
+@Table(name = "seats", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"theater_room_id", "rowNumber", "seatNumber"})
+})
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private int rowNumber;
+
+    @Column(nullable = false)
     private int seatNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "theater_room_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theater_room_id", nullable = false)
     private TheaterRoom theaterRoom;
 }

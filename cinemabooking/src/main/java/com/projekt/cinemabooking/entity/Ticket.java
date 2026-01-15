@@ -2,36 +2,47 @@ package com.projekt.cinemabooking.entity;
 
 import com.projekt.cinemabooking.entity.enums.TicketType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tickets")
+@Builder
+@Table(name = "tickets", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"screening_id", "seat_id"})
+})
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Typ biletu jest wymagany")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TicketType ticketType;
 
-    private double price;
+    @NotNull(message = "Cena jest wymagana")
+    @Min(value = 0, message = "Cena nie może być ujemna")
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
-    @ManyToOne
-    @JoinColumn(name = "booking_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    @ManyToOne
-    @JoinColumn(name = "screening_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screening_id", nullable = false)
+    @NotNull
     private Screening screening;
 
-    @ManyToOne
-    @JoinColumn(name = "seat_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_id", nullable = false)
+    @NotNull
     private Seat seat;
 }

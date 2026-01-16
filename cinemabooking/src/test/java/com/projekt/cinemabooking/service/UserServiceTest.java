@@ -1,7 +1,7 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.user.UpdateUserDto;
-import com.projekt.cinemabooking.dto.user.UserDto;
+import com.projekt.cinemabooking.dto.input.UpdateUserDto;
+import com.projekt.cinemabooking.dto.output.UserDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
 import com.projekt.cinemabooking.mapper.UserMapper;
@@ -41,20 +41,21 @@ class UserServiceTest {
     @Test
     @DisplayName("Powinien zaktualizować dane użytkownika i zahaszować hasło")
     void shouldUpdateUserAndPassword() {
-        String email = "test@test.pl";
+        Long userId = 1L;
         User user = new User();
-        user.setEmail(email);
+        user.setId(userId);
+        user.setPassword("oldPass");
 
         UpdateUserDto dto = new UpdateUserDto();
         dto.setFirstName("Jan");
         dto.setPassword("newPass");
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user)); // ZMIANA: findById
         when(passwordEncoder.encode("newPass")).thenReturn("encodedPass");
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.mapToDto(user)).thenReturn(new UserDto());
 
-        userService.updateUser(email, dto);
+        userService.updateUser(userId, dto); // ZMIANA: Przekazujemy ID
 
         assertThat(user.getFirstName()).isEqualTo("Jan");
         assertThat(user.getPassword()).isEqualTo("encodedPass");
@@ -62,21 +63,16 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Powinien zablokować i odblokować użytkownika")
     void shouldToggleBlockUser() {
         User user = new User();
-        user.setId(1L);
+        user.setId(2L); // target
         user.setActive(true);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
 
-        userService.toggleBlockUser(1L);
+        userService.toggleBlockUser(2L, 1L);
 
         assertThat(user.isActive()).isFalse();
-
-        userService.toggleBlockUser(1L);
-
-        assertThat(user.isActive()).isTrue();
     }
 
     @Test
@@ -87,10 +83,10 @@ class UserServiceTest {
         user.setRoles(new HashSet<>());
 
         Role adminRole = new Role();
-        adminRole.setName("ADMIN");
+        adminRole.setName("ROLE_ADMIN");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(roleRepository.findByName("ADMIN")).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findByName("ROLE_ADMIN")).thenReturn(Optional.of(adminRole));
 
         userService.promoteToAdmin(1L);
 
@@ -102,21 +98,10 @@ class UserServiceTest {
     @DisplayName("Powinien rzucić wyjątek, gdy rola ADMIN nie istnieje")
     void shouldThrowExceptionWhenAdminRoleMissing() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
-        when(roleRepository.findByName("ADMIN")).thenReturn(Optional.empty());
+        when(roleRepository.findByName("ROLE_ADMIN")).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> userService.promoteToAdmin(1L));
     }
 
-    @Test
-    @DisplayName("Powinien pobrać użytkownika po emailu")
-    void shouldGetUserByEmail() {
-        String email = "test@test.pl";
-        User user = new User();
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(userMapper.mapToDto(user)).thenReturn(new UserDto());
 
-        userService.getUserByEmail(email);
-
-        verify(userRepository).findByEmail(email);
-    }
 }

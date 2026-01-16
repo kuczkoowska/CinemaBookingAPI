@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.mapper;
 
-import com.projekt.cinemabooking.dto.UserAdminDto;
+import com.projekt.cinemabooking.dto.output.UserAdminDto;
 import com.projekt.cinemabooking.dto.output.UserDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;

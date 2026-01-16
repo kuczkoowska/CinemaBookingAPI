@@ -3,8 +3,13 @@ spring:
     name: cinemabooking
 
   # H2
+  #  datasource:
+  #    url: jdbc:h2:mem:kino_db
+  #    driverClassName: org.h2.Driver
+  #    username: sa
+  #    password:
   datasource:
-    url: jdbc:h2:mem:kino_db
+    url: jdbc:h2:file:./data/kino_db
     driverClassName: org.h2.Driver
     username: sa
     password:
@@ -16,18 +21,23 @@ spring:
       path: /h2-console
 
   # JPA i Hibernate
+  #  jpa:
+  #    database-platform: org.hibernate.dialect.H2Dialect
+  #    hibernate:
+  #      ddl-auto: update # automatycznie tworzy tabele
+  #    show-sql: true # Pokazuje zapytania SQL w konsoli
+  #    defer-datasource-initialization: true
+
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update # automatycznie tworzy tabele
-    show-sql: true # Pokazuje zapytania SQL w konsoli
+      ddl-auto: update
+    show-sql: true
     defer-datasource-initialization: true
 
   sql:
     init:
       mode: always
 
-  # Thymeleaf (zeby nie cacheowal widok�w)
   thymeleaf:
     cache: false
 

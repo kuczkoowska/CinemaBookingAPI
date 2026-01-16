@@ -1,6 +1,7 @@
 package com.projekt.cinemabooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.projekt.cinemabooking.controller.api.AuthController;
 import com.projekt.cinemabooking.dto.input.RegisterDto;
 import com.projekt.cinemabooking.exception.GlobalExceptionHandler;
 import com.projekt.cinemabooking.service.AuthService;

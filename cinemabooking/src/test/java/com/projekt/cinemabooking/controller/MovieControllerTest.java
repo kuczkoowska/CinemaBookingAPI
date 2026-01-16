@@ -2,6 +2,7 @@ package com.projekt.cinemabooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projekt.cinemabooking.config.SecurityConfig;
+import com.projekt.cinemabooking.controller.api.MovieController;
 import com.projekt.cinemabooking.dto.input.CreateMovieDto;
 import com.projekt.cinemabooking.dto.output.MovieDto;
 import com.projekt.cinemabooking.entity.enums.MovieGenre;

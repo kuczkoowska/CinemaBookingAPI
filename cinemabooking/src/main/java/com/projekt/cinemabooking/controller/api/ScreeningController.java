@@ -1,8 +1,8 @@
-package com.projekt.cinemabooking.controller;
+package com.projekt.cinemabooking.controller.api;
 
-import com.projekt.cinemabooking.dto.screening.CreateScreeningDto;
-import com.projekt.cinemabooking.dto.screening.ScreeningDto;
-import com.projekt.cinemabooking.dto.seat.SeatDto;
+import com.projekt.cinemabooking.dto.input.CreateScreeningDto;
+import com.projekt.cinemabooking.dto.output.ScreeningDto;
+import com.projekt.cinemabooking.dto.output.SeatDto;
 import com.projekt.cinemabooking.service.ScreeningService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,11 +32,21 @@ public class ScreeningController {
         return ResponseEntity.status(201).body(id);
     }
 
-    @Operation(summary = "Pobierz repertuar", description = "Zwraca wszystkie zaplanowane seanse.")
+//    @Operation(summary = "Pobierz repertuar", description = "Zwraca wszystkie zaplanowane seanse.")
+//    @GetMapping
+//    public ResponseEntity<List<ScreeningDto>> getAllScreenings() {
+//        List<ScreeningDto> screenings = screeningService.getAllScreenings();
+//        return ResponseEntity.ok(screenings);
+//    }
+
+    @Operation(summary = "Pobierz repertuar na dany dzień")
     @GetMapping
-    public ResponseEntity<List<ScreeningDto>> getAllScreenings() {
-        List<ScreeningDto> screenings = screeningService.getAllScreenings();
-        return ResponseEntity.ok(screenings);
+    public ResponseEntity<List<ScreeningDto>> getScreenings(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        LocalDate targetDate = (date != null) ? date : LocalDate.now();
+
+        return ResponseEntity.ok(screeningService.getScreeningsByDate(targetDate));
     }
 
     @Operation(summary = "Pobierz seanse dla filmu", description = "Zwraca listę godzin seansów dla konkretnego filmu")

@@ -1,8 +1,8 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.screening.CreateScreeningDto;
-import com.projekt.cinemabooking.dto.screening.ScreeningDto;
-import com.projekt.cinemabooking.dto.seat.SeatDto;
+import com.projekt.cinemabooking.dto.input.CreateScreeningDto;
+import com.projekt.cinemabooking.dto.output.ScreeningDto;
+import com.projekt.cinemabooking.dto.output.SeatDto;
 import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
@@ -31,25 +31,25 @@ public class ScreeningService {
     private final TicketRepository ticketRepository;
 
     @Transactional
-    public Long createScreening(CreateScreeningDto createScreeningDto) {
-        Movie movie = movieRepository.findById(createScreeningDto.getMovieId()).orElseThrow(() -> new ResourceNotFoundException("Film", createScreeningDto.getMovieId()));
+    public Long createScreening(CreateScreeningDto dto) {
+        Movie movie = movieRepository.findById(dto.getMovieId())
+                .orElseThrow(() -> new ResourceNotFoundException("Film", dto.getMovieId()));
 
-        TheaterRoom room = theaterRoomRepository.findById(createScreeningDto.getTheaterRoomId()).orElseThrow(() -> new ResourceNotFoundException("Sala", createScreeningDto.getTheaterRoomId()));
+        TheaterRoom room = theaterRoomRepository.findById(dto.getTheaterRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sala", dto.getTheaterRoomId()));
 
-        LocalDateTime startTime = createScreeningDto.getStartTime();
-        LocalDateTime endTime = startTime.plusMinutes(movie.getDurationMinutes() + 20);
+        LocalDateTime endTime = dto.getStartTime().plusMinutes(movie.getDurationMinutes() + 20);
 
-        List<Screening> conflicts = screeningRepository.findOverlappingScreenings(room.getId(), startTime, endTime);
-
+        List<Screening> conflicts = screeningRepository.findOverlappingScreenings(room.getId(), dto.getStartTime(), endTime);
         if (!conflicts.isEmpty()) {
-            throw new IllegalArgumentException("Sala jest zajęta w tym terminie! Kolizja z seansem: " + conflicts.getFirst().getMovie().getTitle() + " - " + conflicts.getFirst().getId());
+            throw new IllegalStateException("Sala jest zajęta");
         }
 
         Screening screening = new Screening();
-        screeningMapper.updateScreeningFromDto(createScreeningDto, screening);
+        screening.setStartTime(dto.getStartTime());
+        screening.setEndTime(endTime);
         screening.setMovie(movie);
         screening.setTheaterRoom(room);
-        screening.setEndTime(endTime);
 
         return screeningRepository.save(screening).getId();
     }
@@ -63,22 +63,12 @@ public class ScreeningService {
 
     @Transactional(readOnly = true)
     public List<ScreeningDto> findByMovieId(Long id, LocalDate date) {
-        List<Screening> screenings;
-
         if (date != null) {
-            LocalDateTime startOfDay = date.atStartOfDay();
-            LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-
-            screenings = screeningRepository.findByMovieIdAndStartTimeBetween(id, startOfDay, endOfDay);
-        } else {
-            LocalDateTime now = LocalDateTime.now();
-
-            screenings = screeningRepository.findByMovieIdAndStartTimeAfter(id, now);
+            return screeningRepository.findByMovieIdAndStartTimeBetween(id, date.atStartOfDay(), date.atTime(LocalTime.MAX))
+                    .stream().map(screeningMapper::mapToDto).toList();
         }
-
-        return screenings.stream()
-                .map(screeningMapper::mapToDto)
-                .toList();
+        return screeningRepository.findByMovieIdAndStartTimeAfter(id, LocalDateTime.now())
+                .stream().map(screeningMapper::mapToDto).toList();
     }
 
     @Transactional(readOnly = true)
@@ -89,15 +79,16 @@ public class ScreeningService {
 
     @Transactional(readOnly = true)
     public List<SeatDto> getSeatsForScreening(Long screeningId) {
-        Screening screening = screeningRepository.findById(screeningId).orElseThrow(() -> new ResourceNotFoundException("Seans", screeningId));
+        Screening screening = screeningRepository.findById(screeningId)
+                .orElseThrow(() -> new ResourceNotFoundException("Seans", screeningId));
 
         List<Seat> allSeats = seatRepository.findByTheaterRoomId(screening.getTheaterRoom().getId());
 
         List<Ticket> tickets = ticketRepository.findAllByScreeningId(screeningId);
 
-        Set<Long> takenSeats = tickets.stream()
-                .filter(ticket -> ticket.getBooking().getStatus() != BookingStatus.ANULOWANA)
-                .map(ticket -> ticket.getSeat().getId())
+        Set<Long> takenSeatIds = tickets.stream()
+                .filter(t -> t.getBooking().getStatus() != BookingStatus.ANULOWANA)
+                .map(t -> t.getSeat().getId())
                 .collect(Collectors.toSet());
 
         return allSeats.stream()
@@ -105,8 +96,19 @@ public class ScreeningService {
                         .id(seat.getId())
                         .rowNumber(seat.getRowNumber())
                         .seatNumber(seat.getSeatNumber())
-                        .available(!takenSeats.contains(seat.getId()))
+                        .available(!takenSeatIds.contains(seat.getId()))
                         .build())
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScreeningDto> getScreeningsByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return screeningRepository.findAllByStartTimeBetweenOrderByStartTimeAsc(startOfDay, endOfDay)
+                .stream()
+                .map(screeningMapper::mapToDto)
+                .toList();
     }
 }

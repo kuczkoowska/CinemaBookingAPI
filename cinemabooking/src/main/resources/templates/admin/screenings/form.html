@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html th:replace="~{admin/layout :: layout(~{::content})}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Nowy Seans</h1>
+    </div>
+
+    <div class="alert alert-danger" role="alert" th:if="${errorMessage}">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}">Błąd</span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" th:action="@{/admin/screenings}" th:object="${screening}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Wybierz Film</label>
+                            <select class="form-select" required th:field="*{movieId}">
+                                <option disabled selected value="">-- Wybierz film z listy --</option>
+                                <option th:each="movie : ${movies}"
+                                        th:text="${movie.title} + ' (' + ${movie.durationMinutes} + ' min)'"
+                                        th:value="${movie.id}">
+                                    Matrix (136 min)
+                                </option>
+                            </select>
+                            <div class="form-text">Czas zakończenia zostanie obliczony automatycznie.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Wybierz Salę</label>
+                            <select class="form-select" required th:field="*{theaterRoomId}">
+                                <option disabled selected value="">-- Wybierz salę --</option>
+                                <option th:each="room : ${rooms}"
+                                        th:text="${room.name} + ' (Rzędów: ' + ${room.totalRows} + ')'"
+                                        th:value="${room.id}">
+                                    Sala A
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Data i Godzina rozpoczęcia</label>
+                            <input class="form-control" required th:field="*{startTime}" type="datetime-local">
+                            <div class="invalid-feedback" th:errors="*{startTime}">Błędna data</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <button class="btn btn-success w-100" type="submit">
+                            <i class="bi bi-check-lg"></i> Zaplanuj seans
+                        </button>
+                        <a class="btn btn-light w-100 mt-2" th:href="@{/admin/screenings}">Anuluj</a>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="alert alert-info">
+                <h4 class="alert-heading">Zasady planowania</h4>
+                <p>System automatycznie sprawdzi, czy:</p>
+                <ul>
+                    <li>Sala jest wolna w wybranym terminie.</li>
+                    <li>Uwzględniono czas trwania filmu + 20 minut na sprzątanie.</li>
+                </ul>
+                <hr>
+                <p class="mb-0">Jeśli wystąpi kolizja, otrzymasz komunikat błędu.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

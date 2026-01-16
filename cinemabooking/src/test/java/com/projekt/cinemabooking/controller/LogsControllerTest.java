@@ -1,5 +1,6 @@
 package com.projekt.cinemabooking.controller;
 
+import com.projekt.cinemabooking.controller.api.LogsController;
 import com.projekt.cinemabooking.entity.SystemLog;
 import com.projekt.cinemabooking.entity.enums.LogType;
 import com.projekt.cinemabooking.repository.LogRepository;

@@ -1,8 +1,8 @@
 package com.projekt.cinemabooking.service;
 
 
-import com.projekt.cinemabooking.dto.screening.CreateScreeningDto;
-import com.projekt.cinemabooking.dto.seat.SeatDto;
+import com.projekt.cinemabooking.dto.input.CreateScreeningDto;
+import com.projekt.cinemabooking.dto.output.SeatDto;
 import com.projekt.cinemabooking.entity.*;
 import com.projekt.cinemabooking.entity.enums.BookingStatus;
 import com.projekt.cinemabooking.mapper.ScreeningMapper;
@@ -95,7 +95,7 @@ class ScreeningServiceTest {
         when(theaterRoomRepository.findById(1L)).thenReturn(Optional.of(room));
         when(screeningRepository.findOverlappingScreenings(eq(1L), any(), any())).thenReturn(List.of(conflict));
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> screeningService.createScreening(dto));
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> screeningService.createScreening(dto));
         assertThat(ex.getMessage()).contains("Sala jest zajęta");
 
         verify(screeningRepository, never()).save(any());

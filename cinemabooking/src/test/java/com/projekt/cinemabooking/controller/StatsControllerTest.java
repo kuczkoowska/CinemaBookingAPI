@@ -1,5 +1,6 @@
 package com.projekt.cinemabooking.controller;
 
+import com.projekt.cinemabooking.controller.api.StatsController;
 import com.projekt.cinemabooking.dto.output.SalesStatsDto;
 import com.projekt.cinemabooking.repository.SalesStatisticsRepository;
 import org.junit.jupiter.api.DisplayName;

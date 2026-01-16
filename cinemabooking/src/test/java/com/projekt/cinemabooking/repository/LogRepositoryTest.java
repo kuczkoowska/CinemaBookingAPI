@@ -1,5 +1,7 @@
 package com.projekt.cinemabooking.repository;
 
+import com.projekt.cinemabooking.entity.SystemLog;
+import com.projekt.cinemabooking.entity.enums.LogType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,27 +45,34 @@ class LogRepositoryTest {
 
     @Test
     void shouldSaveAndRetrieveLog() {
-        String type = "ERROR";
+        LogType type = LogType.ERROR;
         String msg = "Something went wrong";
         String email = "admin@test.pl";
 
         logRepository.saveLog(type, msg, email);
 
-        List<Map<String, Object>> logs = logRepository.getAllLogs();
+        List<SystemLog> logs = logRepository.getAllLogs();
+
         assertThat(logs).hasSize(1);
-        assertThat(logs.getFirst().get("TYPE")).isEqualTo("ERROR");
-        assertThat(logs.getFirst().get("MESSAGE")).isEqualTo("Something went wrong");
+
+        SystemLog log = logs.get(0);
+        assertThat(log.getType()).isEqualTo(LogType.ERROR);
+        assertThat(log.getMessage()).isEqualTo("Something went wrong");
+        assertThat(log.getUserEmail()).isEqualTo("admin@test.pl");
+        assertThat(log.getCreatedAt()).isNotNull();
     }
 
     @Test
     void shouldFilterLogsByType() {
-        logRepository.saveLog("INFO", "Login success", "user@test.pl");
-        logRepository.saveLog("ERROR", "DB connection fail", "admin@test.pl");
-        logRepository.saveLog("INFO", "Logout", "user@test.pl");
+        logRepository.saveLog(LogType.INFO, "Login success", "user@test.pl");
+        logRepository.saveLog(LogType.ERROR, "DB connection fail", "admin@test.pl");
+        logRepository.saveLog(LogType.INFO, "Logout", "user@test.pl");
 
-        List<Map<String, Object>> infoLogs = logRepository.getLogsByType("INFO");
+        List<SystemLog> infoLogs = logRepository.getLogsByType(LogType.INFO);
 
         assertThat(infoLogs).hasSize(2);
-        assertThat(infoLogs).extracting(map -> map.get("TYPE")).containsOnly("INFO");
+        assertThat(infoLogs)
+                .extracting(SystemLog::getType)
+                .containsOnly(LogType.INFO);
     }
 }

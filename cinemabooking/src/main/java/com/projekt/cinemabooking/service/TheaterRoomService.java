@@ -1,7 +1,6 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.seat.CreateSeatsDto;
-import com.projekt.cinemabooking.dto.theater.TheaterRoomDto;
+import com.projekt.cinemabooking.dto.input.CreateRoomDto;
 import com.projekt.cinemabooking.entity.Seat;
 import com.projekt.cinemabooking.entity.TheaterRoom;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
@@ -12,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,38 +24,29 @@ public class TheaterRoomService {
 
 
     @Transactional
-    public void generateSeatsForRoom(Long roomId, CreateSeatsDto dto) {
-        TheaterRoom room = theaterRoomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Sala", roomId));
+    public Long createRoom(CreateRoomDto dto) {
+        TheaterRoom room = new TheaterRoom();
+        room.setName(dto.getName());
+        room.setTotalRows(dto.getRows());
+        room.setSeatsPerRow(dto.getSeatsPerRow());
 
-        List<Seat> newSeats = new ArrayList<>();
+        room = theaterRoomRepository.save(room);
 
+        List<Seat> seats = new ArrayList<>();
         for (int row = 1; row <= dto.getRows(); row++) {
             for (int num = 1; num <= dto.getSeatsPerRow(); num++) {
-                Seat seat = new Seat();
-                seat.setRowNumber(row);
-                seat.setSeatNumber(num);
-                seat.setTheaterRoom(room);
-                newSeats.add(seat);
+                Seat seat = Seat.builder()
+                        .rowNumber(row)
+                        .seatNumber(num)
+                        .theaterRoom(room)
+                        .build();
+                seats.add(seat);
             }
         }
 
-        seatRepository.saveAll(newSeats);
-    }
+        seatRepository.saveAll(seats);
 
-    @Transactional
-    public Long createRoom(TheaterRoomDto dto) {
-        TheaterRoom room = new TheaterRoom();
-        room.setName(dto.getName());
-        return theaterRoomRepository.save(room).getId();
-    }
-
-    @Transactional
-    public void editRoom(Long id, TheaterRoomDto dto) {
-        TheaterRoom room = theaterRoomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sala", id));
-
-        room.setName(dto.getName());
-        theaterRoomRepository.save(room);
+        return room.getId();
     }
 
     @Transactional
@@ -75,21 +64,4 @@ public class TheaterRoomService {
         theaterRoomRepository.delete(room);
     }
 
-    @Transactional
-    public void updateSeatLayout(Long roomId, CreateSeatsDto dto) {
-        TheaterRoom room = theaterRoomRepository.findById(roomId).orElseThrow(() -> new ResourceNotFoundException("Sala", roomId));
-
-        boolean hasFutureScreenings = screeningRepository.existsByTheaterRoomIdAndStartTimeAfter(roomId, LocalDateTime.now());
-
-        if (hasFutureScreenings) {
-            throw new IllegalStateException(
-                    "Nie można zmienić układu sali! W tej sali są zaplanowane przyszłe seanse."
-            );
-        }
-
-        seatRepository.deleteAllByTheaterRoom(room);
-        seatRepository.flush();
-
-        generateSeatsForRoom(roomId, dto);
-    }
 }

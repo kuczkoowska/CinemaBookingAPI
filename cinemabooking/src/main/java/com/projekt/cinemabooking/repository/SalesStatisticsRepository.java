@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.repository;
 
-import com.projekt.cinemabooking.dto.admin.SalesStatsDto;
+import com.projekt.cinemabooking.dto.output.SalesStatsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,7 +24,7 @@ public class SalesStatisticsRepository {
             default -> "sale_date";
         };
 
-        String direction = sortDir.equalsIgnoreCase("ASC") ? "ASC" : "DESC";
+        String safeDirection = "DESC".equalsIgnoreCase(sortDir) ? "DESC" : "ASC";
 
         String sql = """
                     SELECT 
@@ -36,7 +36,7 @@ public class SalesStatisticsRepository {
                     WHERE b.status = 'OPLACONA'
                     GROUP BY CAST(b.booking_time AS DATE)
                     ORDER BY %s %s
-                """.formatted(orderByColumn, direction);
+                """.formatted(orderByColumn, safeDirection);
 
         return jdbcTemplate.query(sql, new SalesStatsRowMapper());
     }

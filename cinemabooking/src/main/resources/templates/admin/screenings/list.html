@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html th:replace="~{admin/layout :: layout(~{::content})}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Repertuar (Seanse)</h1>
+        <a class="btn btn-primary" th:href="@{/admin/screenings/new}">
+            <i class="bi bi-calendar-plus"></i> Zaplanuj seans
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Film</th>
+                <th>Sala</th>
+                <th>Data i Godzina</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${screenings}">
+                <td th:text="${s.id}">1</td>
+
+                <td class="fw-bold" th:text="${s.movieTitle != null ? s.movieTitle : 'ID: ' + s.movieId}">Tytuł</td>
+
+                <td th:text="${s.theaterRoomName != null ? s.theaterRoomName : 'ID: ' + s.theaterRoomId}">Sala A</td>
+
+                <td th:text="${#temporals.format(s.startTime, 'dd-MM-yyyy HH:mm')}">2023-10-01 18:00</td>
+
+            </tr>
+            <tr th:if="${#lists.isEmpty(screenings)}">
+                <td class="text-center text-muted" colspan="5">Brak zaplanowanych seansów.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

@@ -35,8 +35,10 @@ public class User {
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Builder.Default
     private boolean isActive = true;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

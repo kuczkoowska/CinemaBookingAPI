@@ -1,8 +1,8 @@
-package com.projekt.cinemabooking.controller;
+package com.projekt.cinemabooking.controller.api;
 
-import com.projekt.cinemabooking.dto.booking.BookingDto;
-import com.projekt.cinemabooking.dto.seat.LockSeatsDto;
-import com.projekt.cinemabooking.dto.ticket.UpdateTicketTypeDto;
+import com.projekt.cinemabooking.dto.input.LockSeatsDto;
+import com.projekt.cinemabooking.dto.input.UpdateTicketTypeDto;
+import com.projekt.cinemabooking.dto.output.BookingDto;
 import com.projekt.cinemabooking.security.CustomUserDetails;
 import com.projekt.cinemabooking.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;

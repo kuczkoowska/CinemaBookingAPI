@@ -5,6 +5,7 @@ import com.projekt.cinemabooking.dto.input.RegisterDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
+import com.projekt.cinemabooking.repository.LogRepository;
 import com.projekt.cinemabooking.repository.RoleRepository;
 import com.projekt.cinemabooking.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +32,8 @@ class AuthServiceTest {
     private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
-
+    @Mock
+    private LogRepository logRepository;
     @InjectMocks
     private AuthService authService;
 

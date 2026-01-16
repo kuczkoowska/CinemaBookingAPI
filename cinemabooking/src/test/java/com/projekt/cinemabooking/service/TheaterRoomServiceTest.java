@@ -1,7 +1,6 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.seat.CreateSeatsDto;
-import com.projekt.cinemabooking.dto.theater.TheaterRoomDto;
+import com.projekt.cinemabooking.dto.input.CreateRoomDto;
 import com.projekt.cinemabooking.entity.TheaterRoom;
 import com.projekt.cinemabooking.repository.ScreeningRepository;
 import com.projekt.cinemabooking.repository.SeatRepository;
@@ -13,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,18 +33,29 @@ class TheaterRoomServiceTest {
     private TheaterRoomService theaterRoomService;
 
     @Test
-    @DisplayName("Powinien wygenerować miejsca dla sali")
-    void shouldGenerateSeatsForRoom() {
-        CreateSeatsDto dto = new CreateSeatsDto();
-        dto.setRows(5);
-        dto.setSeatsPerRow(10);
+    @DisplayName("Powinien utworzyć salę I wygenerować miejsca")
+    void shouldCreateRoomAndSeats() {
+        CreateRoomDto dto = CreateRoomDto.builder()
+                .name("Sala A")
+                .rows(5)
+                .seatsPerRow(10)
+                .build();
 
-        TheaterRoom room = new TheaterRoom();
-        when(theaterRoomRepository.findById(1L)).thenReturn(Optional.of(room));
+        TheaterRoom savedRoom = new TheaterRoom();
+        savedRoom.setId(1L);
+        savedRoom.setName("Sala A");
 
-        theaterRoomService.generateSeatsForRoom(1L, dto);
+        when(theaterRoomRepository.save(any(TheaterRoom.class))).thenReturn(savedRoom);
 
-        verify(seatRepository).saveAll(argThat(items -> ((java.util.Collection<?>) items).size() == 50));
+        Long id = theaterRoomService.createRoom(dto);
+
+        assertThat(id).isEqualTo(1L);
+
+        verify(theaterRoomRepository).save(any(TheaterRoom.class));
+
+        verify(seatRepository).saveAll(argThat(items ->
+                ((java.util.Collection<?>) items).size() == 50
+        ));
     }
 
     @Test
@@ -76,36 +85,5 @@ class TheaterRoomServiceTest {
         assertThrows(IllegalStateException.class, () -> theaterRoomService.deleteRoom(1L));
 
         verify(theaterRoomRepository, never()).delete(any());
-    }
-
-    @Test
-    @DisplayName("Nie powinien zmieniać układu sali, jeśli są przyszłe seanse")
-    void shouldThrowExceptionWhenUpdatingLayoutWithFutureScreenings() {
-        when(theaterRoomRepository.findById(1L)).thenReturn(Optional.of(new TheaterRoom()));
-        when(screeningRepository.existsByTheaterRoomIdAndStartTimeAfter(eq(1L), any(LocalDateTime.class)))
-                .thenReturn(true);
-
-        CreateSeatsDto dto = new CreateSeatsDto();
-
-        assertThrows(IllegalStateException.class, () -> theaterRoomService.updateSeatLayout(1L, dto));
-
-        verify(seatRepository, never()).deleteAllByTheaterRoom(any());
-    }
-
-    @Test
-    @DisplayName("Powinien utworzyć nową salę")
-    void shouldCreateRoom() {
-        TheaterRoomDto dto = new TheaterRoomDto();
-        dto.setName("Sala A");
-
-        TheaterRoom savedRoom = new TheaterRoom();
-        savedRoom.setId(1L);
-        savedRoom.setName("Sala A");
-
-        when(theaterRoomRepository.save(any(TheaterRoom.class))).thenReturn(savedRoom);
-
-        Long id = theaterRoomService.createRoom(dto);
-
-        assertThat(id).isEqualTo(1L);
     }
 }

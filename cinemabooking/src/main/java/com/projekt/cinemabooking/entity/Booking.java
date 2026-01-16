@@ -36,6 +36,7 @@ public class Booking {
     private User user;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Ticket> tickets = new ArrayList<>();
 
     @Column(name = "expiration_time", nullable = false)

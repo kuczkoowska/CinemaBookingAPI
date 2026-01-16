@@ -1,16 +1,18 @@
-package com.projekt.cinemabooking.controller;
+package com.projekt.cinemabooking.controller.api;
 
 import com.projekt.cinemabooking.dto.input.RegisterDto;
 import com.projekt.cinemabooking.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,5 +52,21 @@ public class AuthController {
     @GetMapping("/failure")
     public ResponseEntity<String> loginFailure() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Błędny login lub hasło");
+    }
+
+    @Operation(summary = "Logowanie użytkownika", description = "Wpisz login i hasło. Spring Security przechwyci to żądanie i ustawi ciasteczko sesji.")
+    @ApiResponse(responseCode = "200", description = "Zalogowano pomyślnie")
+    @ApiResponse(responseCode = "401", description = "Błędne dane logowania")
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public void login(@RequestBody LoginRequest loginRequest) {
+        throw new IllegalStateException("Ta metoda nie powinna być wywołana. Sprawdź konfigurację Spring Security.");
+    }
+
+    public static class LoginRequest {
+        @Schema(description = "Email użytkownika", example = "admin@kino.pl")
+        public String username;
+
+        @Schema(description = "Hasło", example = "admin123")
+        public String password;
     }
 }

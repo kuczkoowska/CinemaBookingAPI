@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html th:replace="~{admin/layout :: layout(~{::content})}" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Zarządzanie Filmami</h1>
+        <a class="btn btn-primary" th:href="@{/admin/movies/new}">
+            <i class="bi bi-plus-lg"></i> Dodaj film
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Tytuł</th>
+                <th>Gatunek</th>
+                <th>Czas</th>
+                <th>Reżyser</th>
+                <th>Akcje</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="movie : ${movies}">
+                <td th:text="${movie.id}">1</td>
+                <td class="fw-bold" th:text="${movie.title}">Matrix</td>
+                <td>
+                    <span class="badge bg-secondary" th:text="${movie.genre}">SCI_FI</span>
+                </td>
+                <td th:text="${movie.durationMinutes} + ' min'">136 min</td>
+                <td th:text="${movie.director}">Wachowski</td>
+                <td>
+                    <a class="btn btn-sm btn-danger"
+                       onclick="return confirm('Czy na pewno chcesz usunąć ten film?');"
+                       th:href="@{/admin/movies/delete/{id}(id=${movie.id})}">
+                        Usuń
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(movies)}">
+                <td class="text-center text-muted" colspan="6">Brak filmów w bazie. Dodaj pierwszy!</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

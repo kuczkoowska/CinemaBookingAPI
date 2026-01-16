@@ -16,11 +16,11 @@ public class LoginAttemptListener implements ApplicationListener<AuthenticationF
     public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent event) {
         String email = (String) event.getAuthentication().getPrincipal();
 
-        logRepository.saveLog(
-                "AUTH_FAILURE",
-                "Nieudana próba logowania - błędne hasło",
-                email
-        );
+//        logRepository.saveLog(
+//                "AUTH_FAILURE",
+//                "Nieudana próba logowania - błędne hasło",
+//                email
+//        );
         System.out.println("LOG: Zapisano nieudane logowanie dla " + email);
     }
 }

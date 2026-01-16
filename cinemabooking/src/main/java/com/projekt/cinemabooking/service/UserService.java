@@ -1,8 +1,8 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.user.UpdateUserDto;
-import com.projekt.cinemabooking.dto.user.UserAdminDto;
-import com.projekt.cinemabooking.dto.user.UserDto;
+import com.projekt.cinemabooking.dto.input.UpdateUserDto;
+import com.projekt.cinemabooking.dto.output.UserAdminDto;
+import com.projekt.cinemabooking.dto.output.UserDto;
 import com.projekt.cinemabooking.entity.Role;
 import com.projekt.cinemabooking.entity.User;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;

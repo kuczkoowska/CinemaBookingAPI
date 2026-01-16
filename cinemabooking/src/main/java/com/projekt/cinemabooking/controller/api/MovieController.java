@@ -1,4 +1,4 @@
-package com.projekt.cinemabooking.controller;
+package com.projekt.cinemabooking.controller.api;
 
 import com.projekt.cinemabooking.dto.input.CreateMovieDto;
 import com.projekt.cinemabooking.dto.output.MovieDto;

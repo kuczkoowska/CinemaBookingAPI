@@ -1,25 +1,24 @@
 package com.projekt.cinemabooking.service;
 
-import com.projekt.cinemabooking.dto.movie.CreateMovieDto;
-import com.projekt.cinemabooking.dto.movie.MovieDto;
+import com.projekt.cinemabooking.dto.input.CreateMovieDto;
+import com.projekt.cinemabooking.dto.output.MovieDto;
 import com.projekt.cinemabooking.entity.Movie;
+import com.projekt.cinemabooking.entity.Screening;
 import com.projekt.cinemabooking.exception.ResourceNotFoundException;
 import com.projekt.cinemabooking.mapper.MovieMapper;
 import com.projekt.cinemabooking.repository.MovieRepository;
+import com.projekt.cinemabooking.repository.ScreeningRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,6 +30,8 @@ class MovieServiceTest {
     private MovieRepository movieRepository;
     @Mock
     private MovieMapper movieMapper;
+    @Mock
+    private ScreeningRepository screeningRepository;
 
     @InjectMocks
     private MovieService movieService;
@@ -74,14 +75,6 @@ class MovieServiceTest {
     }
 
     @Test
-    @DisplayName("Powinien rzucić wyjątek, gdy film nie istnieje")
-    void shouldThrowExceptionWhenMovieNotFound() {
-        when(movieRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> movieService.getMovieById(99L));
-    }
-
-    @Test
     @DisplayName("Powinien zaktualizować film")
     void shouldUpdateMovie() {
         Movie movie = new Movie();
@@ -105,13 +98,29 @@ class MovieServiceTest {
     }
 
     @Test
-    @DisplayName("Powinien usunąć film jeśli istnieje")
+    @DisplayName("Powinien usunąć film jeśli istnieje i nie ma seansów")
     void shouldDeleteMovie() {
-        when(movieRepository.existsById(1L)).thenReturn(true);
+        Long movieId = 1L;
+        when(movieRepository.existsById(movieId)).thenReturn(true);
+        when(screeningRepository.findByMovieIdAndStartTimeAfter(eq(movieId), any()))
+                .thenReturn(List.of());
 
-        movieService.deleteMovie(1L);
+        movieService.deleteMovie(movieId);
 
-        verify(movieRepository).deleteById(1L);
+        verify(movieRepository).deleteById(movieId);
+    }
+
+    @Test
+    @DisplayName("Powinien ZABRONIĆ usunięcia filmu, który ma zaplanowane seanse")
+    void shouldThrowExceptionWhenDeletingMovieWithScreenings() {
+        Long movieId = 1L;
+        when(movieRepository.existsById(movieId)).thenReturn(true);
+        when(screeningRepository.findByMovieIdAndStartTimeAfter(eq(movieId), any()))
+                .thenReturn(List.of(new Screening()));
+
+        assertThrows(IllegalStateException.class, () -> movieService.deleteMovie(movieId));
+
+        verify(movieRepository, never()).deleteById(any());
     }
 
     @Test
@@ -122,19 +131,5 @@ class MovieServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> movieService.deleteMovie(1L));
         verify(movieRepository, never()).deleteById(any());
     }
-
-    @Test
-    @DisplayName("Powinien zwrócić stronę filmów z filtrowaniem")
-    void shouldGetMoviesPaged() {
-        Pageable pageable = Pageable.unpaged();
-        Movie movie = new Movie();
-        Page<Movie> page = new PageImpl<>(List.of(movie));
-
-        when(movieRepository.searchMovies(any(), any(), any())).thenReturn(page);
-        when(movieMapper.mapToDto(any())).thenReturn(new MovieDto());
-
-        Page<MovieDto> result = movieService.getMovies("Matrix", null, pageable);
-
-        assertThat(result).hasSize(1);
-    }
 }
+

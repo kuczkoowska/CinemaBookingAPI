@@ -1,7 +1,7 @@
 package com.projekt.cinemabooking.mapper;
 
-import com.projekt.cinemabooking.dto.screening.CreateScreeningDto;
-import com.projekt.cinemabooking.dto.screening.ScreeningDto;
+import com.projekt.cinemabooking.dto.input.CreateScreeningDto;
+import com.projekt.cinemabooking.dto.output.ScreeningDto;
 import com.projekt.cinemabooking.entity.Screening;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,10 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ScreeningMapper {
 
-    //bez movieId i theaterRoomId -> tylko data (moze dodam is3d etc.)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "movie", ignore = true)
+    @Mapping(target = "theaterRoom", ignore = true)
+    @Mapping(target = "endTime", ignore = true)
     void updateScreeningFromDto(CreateScreeningDto screeningDto, @MappingTarget Screening screening);
 
     @Mapping(source = "movie.title", target = "movieTitle")
@@ -19,5 +22,9 @@ public interface ScreeningMapper {
     @Mapping(source = "theaterRoom.id", target = "theaterRoomId")
     ScreeningDto mapToDto(Screening screening);
 
-    Screening mapToEntity(ScreeningDto dto);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "movie", ignore = true)
+    @Mapping(target = "theaterRoom", ignore = true)
+    @Mapping(target = "endTime", ignore = true)
+    Screening mapToEntity(CreateScreeningDto dto);
 }

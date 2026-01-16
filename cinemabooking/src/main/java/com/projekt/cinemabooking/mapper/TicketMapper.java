@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.mapper;
 
-import com.projekt.cinemabooking.dto.ticket.TicketDto;
+import com.projekt.cinemabooking.dto.output.TicketDto;
 import com.projekt.cinemabooking.entity.Ticket;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

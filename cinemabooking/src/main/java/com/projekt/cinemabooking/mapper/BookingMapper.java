@@ -1,46 +1,30 @@
 package com.projekt.cinemabooking.mapper;
 
-import com.projekt.cinemabooking.dto.booking.BookingDto;
+import com.projekt.cinemabooking.dto.output.BookingDto;
 import com.projekt.cinemabooking.entity.Booking;
-import com.projekt.cinemabooking.entity.Screening;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import com.projekt.cinemabooking.entity.Ticket;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-import java.time.LocalDateTime;
+@Mapper(componentModel = "spring", uses = {TicketMapper.class})
+public interface BookingMapper {
 
-@Component
-@RequiredArgsConstructor
-public class BookingMapper {
 
-    private final TicketMapper ticketMapper;
+    @Mapping(target = "movieTitle", ignore = true)
+    @Mapping(target = "theaterRoomName", ignore = true)
+    @Mapping(target = "screeningTime", ignore = true)
+    BookingDto mapToDto(Booking booking);
 
-    public BookingDto mapToDto(Booking booking) {
-        String movieTitle = "Nieznany";
-        String roomName = "Nieznana";
-        LocalDateTime screeningTime = null;
 
-        if (booking.getTickets() != null && !booking.getTickets().isEmpty()) {
-            Screening screening = booking.getTickets().getFirst().getScreening();
-            movieTitle = screening.getMovie().getTitle();
-            roomName = screening.getTheaterRoom().getName();
-            screeningTime = screening.getStartTime();
+    @AfterMapping
+    default void mapScreeningDetails(Booking source, @MappingTarget BookingDto target) {
+        if (source.getTickets() == null || source.getTickets().isEmpty()) {
+            return;
         }
 
-        return BookingDto.builder()
-                .id(booking.getId())
-                .bookingTime(booking.getBookingTime())
-                .status(booking.getStatus())
-                .totalAmount(booking.getTotalAmount())
-                .movieTitle(movieTitle)
-                .theaterRoomName(roomName)
-                .screeningTime(screeningTime)
-                .expirationTime(booking.getExpirationTime())
-                .tickets(booking.getTickets() != null
-                        ? booking.getTickets().stream()
-                        .map(ticketMapper::mapToDto)
-                        .toList()
-                        : java.util.List.of())
-                .build();
-    }
 
+        Ticket firstTicket = source.getTickets().getFirst();
+    }
 }

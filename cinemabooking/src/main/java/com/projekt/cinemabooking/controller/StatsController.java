@@ -1,6 +1,6 @@
 package com.projekt.cinemabooking.controller;
 
-import com.projekt.cinemabooking.dto.admin.SalesStatsDto;
+import com.projekt.cinemabooking.dto.output.SalesStatsDto;
 import com.projekt.cinemabooking.repository.SalesStatisticsRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

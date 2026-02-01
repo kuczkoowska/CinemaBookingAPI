@@ -38,7 +38,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(registerDto.getPassword()))
                 .firstName(registerDto.getFirstName())
                 .lastName(registerDto.getLastName())
-                .isActive(true)
+                .active(true)
                 .roles(Set.of(roleUser))
                 .build();
 

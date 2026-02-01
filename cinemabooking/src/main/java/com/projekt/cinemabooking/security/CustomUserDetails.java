@@ -35,6 +35,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isActive();
+        // Pozwalamy zalogować się nawet gdy konto nieaktywne
+        // Dostęp do zasobów będzie kontrolowany przez guardy na froncie
+        return true;
     }
 }

@@ -16,12 +16,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika o emailu: " + email));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika o emailu: " + email));
 
-        if (!user.isActive()) {
-            throw new UsernameNotFoundException("Konto nieaktywne: " + email);
-        }
-
+        // Zablokowany użytkownik może się zalogować, ale ma ograniczony dostęp
+        // Sprawdzenie isActive będzie wykonywane przez guard na froncie
         return new CustomUserDetails(user);
     }
 }

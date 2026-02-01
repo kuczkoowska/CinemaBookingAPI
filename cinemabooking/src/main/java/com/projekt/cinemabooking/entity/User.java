@@ -36,7 +36,8 @@ public class User {
     private String lastName;
 
     @Builder.Default
-    private boolean isActive = true;
+    @Column(name = "is_active")
+    private boolean active = true;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)

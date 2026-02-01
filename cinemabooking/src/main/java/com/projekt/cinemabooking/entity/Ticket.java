@@ -45,4 +45,6 @@ public class Ticket {
     @JoinColumn(name = "seat_id", nullable = false)
     @NotNull
     private Seat seat;
+
+    private String guestName;
 }

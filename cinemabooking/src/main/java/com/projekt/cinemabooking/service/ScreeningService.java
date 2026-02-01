@@ -57,24 +57,26 @@ public class ScreeningService {
     @Transactional(readOnly = true)
     public List<ScreeningDto> getAllScreenings() {
         return screeningRepository.findAll().stream()
-                .map(screeningMapper::mapToDto)
+                .map(this::mapToDtoWithSeats)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ScreeningDto> findByMovieId(Long id, LocalDate date) {
+        List<Screening> screenings;
         if (date != null) {
-            return screeningRepository.findByMovieIdAndStartTimeBetween(id, date.atStartOfDay(), date.atTime(LocalTime.MAX))
-                    .stream().map(screeningMapper::mapToDto).toList();
+            screenings = screeningRepository.findByMovieIdAndStartTimeBetween(id, date.atStartOfDay(), date.atTime(LocalTime.MAX));
+        } else {
+            // Pobierz wszystkie seanse od początku dzisiejszego dnia
+            screenings = screeningRepository.findByMovieIdAndStartTimeAfter(id, LocalDate.now().atStartOfDay());
         }
-        return screeningRepository.findByMovieIdAndStartTimeAfter(id, LocalDateTime.now())
-                .stream().map(screeningMapper::mapToDto).toList();
+        return screenings.stream().map(this::mapToDtoWithSeats).toList();
     }
 
     @Transactional(readOnly = true)
     public ScreeningDto getScreeningById(Long id) {
         Screening screening = screeningRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Seans", id));
-        return screeningMapper.mapToDto(screening);
+        return mapToDtoWithSeats(screening);
     }
 
     @Transactional(readOnly = true)
@@ -108,7 +110,25 @@ public class ScreeningService {
 
         return screeningRepository.findAllByStartTimeBetweenOrderByStartTimeAsc(startOfDay, endOfDay)
                 .stream()
-                .map(screeningMapper::mapToDto)
+                .map(this::mapToDtoWithSeats)
                 .toList();
+    }
+
+    private ScreeningDto mapToDtoWithSeats(Screening screening) {
+        ScreeningDto dto = screeningMapper.mapToDto(screening);
+
+        // Pobierz całkowitą liczbę miejsc w sali
+        int totalSeats = seatRepository.countByTheaterRoomId(screening.getTheaterRoom().getId());
+
+        // Pobierz liczbę zajętych miejsc (z aktywnych rezerwacji)
+        List<Ticket> tickets = ticketRepository.findAllByScreeningId(screening.getId());
+        int takenSeats = (int) tickets.stream()
+                .filter(t -> t.getBooking().getStatus() != BookingStatus.ANULOWANA)
+                .count();
+
+        dto.setTotalSeats(totalSeats);
+        dto.setAvailableSeats(totalSeats - takenSeats);
+
+        return dto;
     }
 }

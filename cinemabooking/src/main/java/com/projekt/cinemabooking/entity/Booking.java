@@ -42,6 +42,11 @@ public class Booking {
     @Column(name = "expiration_time", nullable = false)
     private LocalDateTime expirationTime;
 
+    private String contactPhone;
+    private String invoiceCompany;
+    private String invoiceNip;
+    private String invoiceAddress;
+
     @PrePersist
     public void prePersist() {
         if (this.bookingTime == null) this.bookingTime = LocalDateTime.now();

@@ -9,5 +9,7 @@ import java.util.List;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByTheaterRoomId(Long theaterRoomId);
 
+    int countByTheaterRoomId(Long theaterRoomId);
+
     void deleteAllByTheaterRoom(TheaterRoom theaterRoom);
 }

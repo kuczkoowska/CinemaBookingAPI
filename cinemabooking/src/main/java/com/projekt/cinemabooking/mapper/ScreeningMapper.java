@@ -18,6 +18,11 @@ public interface ScreeningMapper {
 
     @Mapping(source = "movie.title", target = "movieTitle")
     @Mapping(source = "movie.id", target = "movieId")
+    @Mapping(source = "movie.posterUrl", target = "moviePosterUrl")
+    @Mapping(source = "movie.description", target = "movieDescription")
+    @Mapping(source = "movie.durationMinutes", target = "movieDurationMinutes")
+    @Mapping(source = "movie.genre", target = "movieGenre")
+    @Mapping(source = "movie.ageRating", target = "movieAgeRating")
     @Mapping(source = "theaterRoom.name", target = "theaterRoomName")
     @Mapping(source = "theaterRoom.id", target = "theaterRoomId")
     ScreeningDto mapToDto(Screening screening);

@@ -1,5 +1,6 @@
 package com.projekt.cinemabooking.service;
 
+import com.projekt.cinemabooking.dto.input.ConfirmBookingDto;
 import com.projekt.cinemabooking.dto.input.LockSeatsDto;
 import com.projekt.cinemabooking.dto.input.UpdateTicketTypeDto;
 import com.projekt.cinemabooking.dto.output.BookingDto;
@@ -13,6 +14,8 @@ import com.projekt.cinemabooking.mapper.BookingMapper;
 import com.projekt.cinemabooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -168,7 +171,7 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public BookingDto getBookingById(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId)
+        Booking booking = bookingRepository.findByIdWithDetails(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
 
         validateBookingOwnership(booking, userId);
@@ -176,35 +179,60 @@ public class BookingService {
     }
 
     @Transactional
-    public void confirmBooking(Long bookingId, Long userId) {
+    public void confirmBooking(Long bookingId, Long userId, ConfirmBookingDto dto) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rezerwacja", bookingId));
 
-        validateBookingOwnership(booking, userId);
-
-        if (booking.getStatus() == BookingStatus.ANULOWANA) {
-            throw new IllegalStateException("Rezerwacja została anulowana.");
-        }
-        if (booking.getStatus() == BookingStatus.OPLACONA) {
-            return;
+        // 1. Walidacja czy to Twój bilet
+        if (!booking.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("To nie twoja rezerwacja!");
         }
 
-        if (booking.getExpirationTime() != null && LocalDateTime.now().isAfter(booking.getExpirationTime())) {
-            booking.setStatus(BookingStatus.ANULOWANA);
-            bookingRepository.save(booking);
-            throw new IllegalStateException("Czas na płatność minął. Rezerwacja wygasła.");
+        // 2. Czy już opłacone?
+        if (booking.getStatus() == BookingStatus.OPLACONA) return;
+
+        // 3. Zapisywanie danych z formularza
+        if (dto != null) {
+
+            if (dto.getContact() != null && dto.getContact().getPhone() != null) {
+                booking.setContactPhone(dto.getContact().getPhone());
+            }
+
+            if (dto.getHolders() != null && !dto.getHolders().isEmpty()) {
+                for (Ticket ticket : booking.getTickets()) {
+                    dto.getHolders().stream()
+                            .filter(h -> h.getSeatNumber() != null && h.getSeatNumber().equals(ticket.getSeat().getSeatNumber()))
+                            .findFirst()
+                            .ifPresent(holderDto -> {
+                                ticket.setGuestName(holderDto.getName());
+                            });
+                }
+            }
+
+            if (Boolean.TRUE.equals(dto.getWantsInvoice()) && dto.getInvoice() != null) {
+                booking.setInvoiceCompany(dto.getInvoice().getCompanyName());
+                booking.setInvoiceNip(dto.getInvoice().getNip());
+                booking.setInvoiceAddress(dto.getInvoice().getAddress());
+            }
         }
 
         booking.setStatus(BookingStatus.OPLACONA);
         booking.setExpirationTime(null);
 
         bookingRepository.save(booking);
-        logRepository.saveLog(LogType.INFO, "Opłacono rezerwację nr " + bookingId, booking.getUser().getEmail());
+
+        logRepository.saveLog(LogType.INFO, "Opłacono rezerwację " + bookingId, booking.getUser().getEmail());
     }
 
     private BigDecimal getPriceForType(TicketType type) {
         return ticketPriceRepository.findByTicketType(type)
                 .map(TicketPrice::getPrice)
                 .orElseThrow(() -> new RuntimeException("Brak zdefiniowanej ceny w systemie dla typu: " + type));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookingDto> getMyBookings(Long userId, Pageable pageable) {
+        return bookingRepository.findAllByUserIdOrderByBookingTimeDesc(userId, pageable)
+                .map(bookingMapper::mapToDto);
     }
 }

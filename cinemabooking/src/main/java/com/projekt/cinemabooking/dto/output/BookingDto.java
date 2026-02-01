@@ -22,6 +22,12 @@ public class BookingDto {
     private BigDecimal totalAmount;
 
     private String movieTitle;
+    private String moviePosterUrl;
+    private String movieDescription;
+    private Integer movieDurationMinutes;
+    private String movieGenre;
+    private String movieAgeRating;
+    
     private String theaterRoomName;
     private LocalDateTime screeningTime;
 

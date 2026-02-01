@@ -1,5 +1,6 @@
 package com.projekt.cinemabooking.mapper;
 
+import com.projekt.cinemabooking.dto.output.RoleDto;
 import com.projekt.cinemabooking.dto.output.UserAdminDto;
 import com.projekt.cinemabooking.dto.output.UserDto;
 import com.projekt.cinemabooking.entity.Role;
@@ -14,6 +15,8 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToDtos")
+    @Mapping(target = "isActive", source = "active")
     UserDto mapToDto(User user);
 
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToStrings")
@@ -27,6 +30,19 @@ public interface UserMapper {
         }
         return roles.stream()
                 .map(Role::getName)
+                .collect(Collectors.toSet());
+    }
+
+    @Named("mapRolesToDtos")
+    default Set<RoleDto> mapRolesToDtos(Set<Role> roles) {
+        if (roles == null) {
+            return Set.of();
+        }
+        return roles.stream()
+                .map(role -> RoleDto.builder()
+                        .id(role.getId())
+                        .name(role.getName())
+                        .build())
                 .collect(Collectors.toSet());
     }
 }

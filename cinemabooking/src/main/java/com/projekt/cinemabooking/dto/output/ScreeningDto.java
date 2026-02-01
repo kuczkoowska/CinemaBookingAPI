@@ -17,7 +17,15 @@ public class ScreeningDto {
 
     private Long movieId;
     private String movieTitle;
+    private String moviePosterUrl;
+    private String movieDescription;
+    private Integer movieDurationMinutes;
+    private String movieGenre;
+    private Integer movieAgeRating;
 
     private Long theaterRoomId;
     private String theaterRoomName;
+
+    private Integer availableSeats;
+    private Integer totalSeats;
 }

@@ -76,6 +76,11 @@ class MovieRepositoryTest {
         m.setTitle(title);
         m.setGenre(genre);
         m.setDurationMinutes(120);
+
+        m.setDirector("Test Director");
+        m.setDescription("Test Description for " + title);
+        m.setPosterUrl("http://example.com/poster.jpg");
+
         movieRepository.save(m);
     }
 }

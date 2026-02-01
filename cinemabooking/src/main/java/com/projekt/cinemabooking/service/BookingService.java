@@ -154,6 +154,7 @@ public class BookingService {
 
         if (booking.getTickets().isEmpty()) {
             booking.setStatus(BookingStatus.ANULOWANA);
+            bookingRepository.save(booking);
             return;
         }
 
@@ -163,6 +164,10 @@ public class BookingService {
             throw new IllegalArgumentException("Zbyt późno na anulowanie. Wymagane 30 min przed seansem.");
         }
 
+        // Usuń bilety, aby zwolnić miejsca
+        booking.getTickets().clear();
+        
+        // Zmień status na anulowana
         booking.setStatus(BookingStatus.ANULOWANA);
         bookingRepository.save(booking);
 
@@ -217,7 +222,6 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.OPLACONA);
-        booking.setExpirationTime(null);
 
         bookingRepository.save(booking);
 
